@@ -1,0 +1,124 @@
+import { Article, NewsAPIArticle, NewsAPIResponse } from './types'
+
+// Calculate estimated read time based on content length
+function calculateReadTime(content: string | null, description: string | null): string {
+    const text = (content || description || '').replace(/<[^>]*>/g, '') // Remove HTML tags
+    const wordsPerMinute = 200
+    const wordCount = text.split(/\s+/).length
+    const minutes = Math.ceil(wordCount / wordsPerMinute)
+    return `${Math.max(1, minutes)} min read`
+}
+
+// Generate random view count for demo purposes
+function generateViewCount(): string {
+    const views = Math.floor(Math.random() * 50000) + 1000
+    if (views >= 1000) {
+        return `${(views / 1000).toFixed(1)}K`
+    }
+    return views.toString()
+}
+
+// Categorize articles based on title and description
+function categorizeArticle(title: string, description: string | null): string {
+    const content = `${title} ${description || ''}`.toLowerCase()
+
+    if (content.includes('openai') || content.includes('gpt') || content.includes('chatgpt') || content.includes('language model')) {
+        return 'AI Models'
+    }
+    if (content.includes('research') || content.includes('study') || content.includes('breakthrough') || content.includes('discovery')) {
+        return 'AI Research'
+    }
+    if (content.includes('autonomous') || content.includes('self-driving') || content.includes('tesla') || content.includes('robotics')) {
+        return 'Autonomous AI'
+    }
+    if (content.includes('healthcare') || content.includes('medical') || content.includes('drug') || content.includes('disease')) {
+        return 'AI Healthcare'
+    }
+    if (content.includes('tool') || content.includes('productivity') || content.includes('copilot') || content.includes('assistant')) {
+        return 'AI Tools'
+    }
+    if (content.includes('chip') || content.includes('nvidia') || content.includes('processor') || content.includes('hardware')) {
+        return 'AI Hardware'
+    }
+    if (content.includes('ethics') || content.includes('safety') || content.includes('regulation') || content.includes('policy')) {
+        return 'AI Ethics'
+    }
+
+    return 'AI Research' // Default category
+}
+
+// Format timestamp to relative time
+function formatTimestamp(publishedAt: string): string {
+    const now = new Date()
+    const published = new Date(publishedAt)
+    const diffInHours = Math.floor((now.getTime() - published.getTime()) / (1000 * 60 * 60))
+
+    if (diffInHours < 1) {
+        return 'Just now'
+    } else if (diffInHours < 24) {
+        return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`
+    } else {
+        const diffInDays = Math.floor(diffInHours / 24)
+        return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`
+    }
+}
+
+// Convert NewsAPI article to our Article format
+export function transformNewsAPIArticle(article: NewsAPIArticle, index: number): Article {
+    return {
+        id: `${Date.now()}-${index}`,
+        headline: article.title,
+        link: article.url,
+        timestamp: formatTimestamp(article.publishedAt),
+        category: categorizeArticle(article.title, article.description),
+        summary: article.description || 'No description available',
+        image: article.urlToImage,
+        readTime: calculateReadTime(article.content, article.description),
+        views: generateViewCount(),
+        featured: index === 0, // Make first article featured
+        author: article.author || undefined,
+        publishedAt: article.publishedAt
+    }
+}
+
+// Fetch AI news from NewsAPI
+export async function fetchAINews(): Promise<NewsAPIResponse> {
+    const apiKey = process.env.NEWSAPI_API_KEY
+
+    if (!apiKey) {
+        throw new Error('NewsAPI key is not configured')
+    }
+
+    const searchQueries = [
+        'artificial intelligence',
+        'machine learning',
+        'AI technology',
+        'neural networks',
+        'deep learning',
+        'OpenAI',
+        'ChatGPT',
+        'AI research'
+    ]
+
+    // Use multiple search terms to get more comprehensive AI news
+    const query = searchQueries.join(' OR ')
+
+    const url = new URL('https://newsapi.org/v2/everything')
+    url.searchParams.append('q', query)
+    url.searchParams.append('sortBy', 'publishedAt')
+    url.searchParams.append('language', 'en')
+    url.searchParams.append('pageSize', '50') // Get more articles to filter from
+    url.searchParams.append('apiKey', apiKey)
+
+    const response = await fetch(url.toString(), {
+        headers: {
+            'User-Agent': 'AI-News-Hub/1.0'
+        }
+    })
+
+    if (!response.ok) {
+        throw new Error(`NewsAPI request failed: ${response.status} ${response.statusText}`)
+    }
+
+    return await response.json()
+}

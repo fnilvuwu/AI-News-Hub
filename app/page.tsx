@@ -1,110 +1,13 @@
 "use client"
 
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Brain, Clock, ExternalLink, Eye, Menu, Search, TrendingUp, X } from "lucide-react"
-import { useMemo, useState } from "react"
-
-const mockNews = [
-  {
-    id: 1,
-    headline: "OpenAI Unveils GPT-5 with Revolutionary Multimodal Capabilities",
-    link: "#",
-    timestamp: "2 hours ago",
-    category: "AI Models",
-    summary: "Next-generation language model demonstrates unprecedented reasoning and creative abilities",
-    image: "/placeholder.svg?height=200&width=400",
-    readTime: "4 min read",
-    views: "45.2K",
-    featured: true,
-  },
-  {
-    id: 2,
-    headline: "Google DeepMind Achieves Breakthrough in AI Protein Folding",
-    link: "#",
-    timestamp: "4 hours ago",
-    category: "AI Research",
-    summary: "AlphaFold 3 predicts protein structures with 99% accuracy, revolutionizing drug discovery",
-    image: "/placeholder.svg?height=200&width=400",
-    readTime: "6 min read",
-    views: "28.7K",
-    featured: false,
-  },
-  {
-    id: 3,
-    headline: "Tesla's Full Self-Driving AI Passes Major Safety Milestone",
-    link: "#",
-    timestamp: "6 hours ago",
-    category: "Autonomous AI",
-    summary: "Neural network achieves 10 million miles without human intervention in testing",
-    image: "/placeholder.svg?height=200&width=400",
-    readTime: "5 min read",
-    views: "32.1K",
-    featured: false,
-  },
-  {
-    id: 4,
-    headline: "AI-Powered Drug Discovery Platform Identifies Cancer Treatment",
-    link: "#",
-    timestamp: "8 hours ago",
-    category: "AI Healthcare",
-    summary: "Machine learning algorithms accelerate pharmaceutical research by 1000x",
-    image: "/placeholder.svg?height=200&width=400",
-    readTime: "7 min read",
-    views: "19.5K",
-    featured: false,
-  },
-  {
-    id: 5,
-    headline: "Microsoft Copilot Integration Transforms Enterprise Productivity",
-    link: "#",
-    timestamp: "12 hours ago",
-    category: "AI Tools",
-    summary: "AI assistant shows 40% productivity gains across Fortune 500 companies",
-    image: "/placeholder.svg?height=200&width=400",
-    readTime: "4 min read",
-    views: "24.8K",
-    featured: false,
-  },
-  {
-    id: 6,
-    headline: "Anthropic's Claude 3 Demonstrates Advanced Reasoning Capabilities",
-    link: "#",
-    timestamp: "1 day ago",
-    category: "AI Models",
-    summary: "Constitutional AI approach shows promise for safer, more reliable AI systems",
-    image: "/placeholder.svg?height=200&width=400",
-    readTime: "5 min read",
-    views: "36.3K",
-    featured: false,
-  },
-  {
-    id: 7,
-    headline: "AI Chip Wars: NVIDIA Unveils Next-Gen H200 GPU Architecture",
-    link: "#",
-    timestamp: "1 day ago",
-    category: "AI Hardware",
-    summary: "New tensor processing units deliver 5x performance improvement for AI training",
-    image: "/placeholder.svg?height=200&width=400",
-    readTime: "6 min read",
-    views: "41.7K",
-    featured: false,
-  },
-  {
-    id: 8,
-    headline: "Ethical AI Framework Adopted by Major Tech Companies",
-    link: "#",
-    timestamp: "2 days ago",
-    category: "AI Ethics",
-    summary: "Industry leaders commit to responsible AI development and deployment standards",
-    image: "/placeholder.svg?height=200&width=400",
-    readTime: "8 min read",
-    views: "15.9K",
-    featured: false,
-  },
-]
+import { useNews } from "@/hooks/use-news"
+import { AlertCircle, Brain, Clock, ExternalLink, Eye, Menu, RefreshCw, Search, TrendingUp, X } from "lucide-react"
+import { useState } from "react"
 
 const categoryColors = {
   "AI Models": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -120,19 +23,10 @@ export default function NewsPortal() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  const filteredNews = useMemo(() => {
-    if (!searchQuery.trim()) return mockNews
+  const { articles, loading, error, refetch } = useNews(searchQuery)
 
-    return mockNews.filter(
-      (article) =>
-        article.headline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.summary.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
-  }, [searchQuery])
-
-  const featuredArticle = filteredNews.find((article) => article.featured)
-  const regularArticles = filteredNews.filter((article) => !article.featured)
+  const featuredArticle = articles.find((article) => article.featured)
+  const regularArticles = articles.filter((article) => !article.featured)
 
   return (
     <div className="min-h-screen bg-background">
@@ -159,6 +53,15 @@ export default function NewsPortal() {
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors font-sans">
                 About
               </a>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={refetch}
+                disabled={loading}
+                className="ml-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              </Button>
             </nav>
 
             {/* Mobile Menu Button */}
@@ -219,16 +122,34 @@ export default function NewsPortal() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        {/* Error Display */}
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error}. <Button variant="link" onClick={refetch} className="p-0 h-auto">Try again</Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Loading State */}
+        {loading && articles.length === 0 && (
+          <div className="flex items-center justify-center py-12">
+            <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted-foreground">Loading AI news...</span>
+          </div>
+        )}
+
         {/* Search Results Info */}
-        {searchQuery && (
+        {searchQuery && !loading && (
           <div className="mb-6">
             <p className="text-muted-foreground font-sans">
-              {filteredNews.length} article{filteredNews.length !== 1 ? "s" : ""} found for "{searchQuery}"
+              {articles.length} article{articles.length !== 1 ? "s" : ""} found for "{searchQuery}"
             </p>
           </div>
         )}
 
-        {featuredArticle && !searchQuery && (
+        {featuredArticle && !searchQuery && !loading && (
           <section className="mb-12">
             <div className="flex items-center mb-6">
               <TrendingUp className="h-5 w-5 text-primary mr-2" />
@@ -266,7 +187,7 @@ export default function NewsPortal() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground font-sans">{featuredArticle.readTime}</span>
                     <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-sans" asChild>
-                      <a href={featuredArticle.link} className="flex items-center">
+                      <a href={featuredArticle.link} target="_blank" rel="noopener noreferrer" className="flex items-center">
                         Read Full Story
                         <ExternalLink className="h-4 w-4 ml-2" />
                       </a>
@@ -278,75 +199,87 @@ export default function NewsPortal() {
           </section>
         )}
 
-        <section>
-          <div className="flex items-center mb-6">
-            <h2 className="text-xl font-serif font-bold text-foreground">
-              {searchQuery ? "Search Results" : "Latest AI News"}
-            </h2>
-          </div>
+        {!loading && articles.length > 0 && (
+          <section>
+            <div className="flex items-center mb-6">
+              <h2 className="text-xl font-serif font-bold text-foreground">
+                {searchQuery ? "Search Results" : "Latest AI News"}
+              </h2>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(searchQuery ? filteredNews : regularArticles).map((article) => (
-              <Card
-                key={article.id}
-                className="group hover:shadow-lg transition-all duration-200 border-border bg-card overflow-hidden"
-              >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={article.image || "/placeholder.svg"}
-                    alt={article.headline}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-3 left-3">
-                    <Badge className={categoryColors[article.category as keyof typeof categoryColors]}>
-                      {article.category}
-                    </Badge>
-                  </div>
-                </div>
-
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center text-xs text-muted-foreground font-sans">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {article.timestamp}
-                    </div>
-                    <div className="flex items-center text-xs text-muted-foreground font-sans">
-                      <Eye className="h-3 w-3 mr-1" />
-                      {article.views}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(searchQuery ? articles : regularArticles).map((article) => (
+                <Card
+                  key={article.id}
+                  className="group hover:shadow-lg transition-all duration-200 border-border bg-card overflow-hidden"
+                >
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={article.image || "/placeholder.svg"}
+                      alt={article.headline}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-3 left-3">
+                      <Badge className={categoryColors[article.category as keyof typeof categoryColors]}>
+                        {article.category}
+                      </Badge>
                     </div>
                   </div>
-                  <h2 className="text-lg font-serif font-bold text-card-foreground group-hover:text-primary transition-colors leading-tight">
-                    {article.headline}
-                  </h2>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-sm text-muted-foreground font-sans mb-4 leading-relaxed">{article.summary}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground font-sans">{article.readTime}</span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors font-sans bg-transparent"
-                      asChild
-                    >
-                      <a href={article.link} className="flex items-center">
-                        Read More
-                        <ExternalLink className="h-3 w-3 ml-2" />
-                      </a>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center text-xs text-muted-foreground font-sans">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {article.timestamp}
+                      </div>
+                      <div className="flex items-center text-xs text-muted-foreground font-sans">
+                        <Eye className="h-3 w-3 mr-1" />
+                        {article.views}
+                      </div>
+                    </div>
+                    <h2 className="text-lg font-serif font-bold text-card-foreground group-hover:text-primary transition-colors leading-tight">
+                      {article.headline}
+                    </h2>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-sm text-muted-foreground font-sans mb-4 leading-relaxed">{article.summary}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground font-sans">{article.readTime}</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors font-sans bg-transparent"
+                        asChild
+                      >
+                        <a href={article.link} target="_blank" rel="noopener noreferrer" className="flex items-center">
+                          Read More
+                          <ExternalLink className="h-3 w-3 ml-2" />
+                        </a>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* No Results */}
-        {filteredNews.length === 0 && searchQuery && (
+        {!loading && articles.length === 0 && searchQuery && (
           <div className="text-center py-12">
             <p className="text-muted-foreground font-sans text-lg mb-4">No AI articles found matching your search.</p>
             <Button variant="outline" onClick={() => setSearchQuery("")} className="font-sans">
               Clear Search
+            </Button>
+          </div>
+        )}
+
+        {/* No Articles State */}
+        {!loading && articles.length === 0 && !searchQuery && !error && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground font-sans text-lg mb-4">No AI news available at the moment.</p>
+            <Button variant="outline" onClick={refetch} className="font-sans">
+              Refresh
             </Button>
           </div>
         )}
