@@ -12,17 +12,7 @@ export function Footer() {
             <div className="container mx-auto px-4 py-8">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 items-center">
                     <div className="flex items-center">
-                        <div className="w-6 h-6 mr-2 flex items-center justify-center">
-                            <Image
-                                src="/ai-news-hub-logo.png"
-                                alt="AI News Hub Logo"
-                                width={24}
-                                height={24}
-                                className="rounded"
-                            />
-                        </div>
-                        <h3 className="text-lg font-serif font-bold text-primary">AI News Hub</h3>
-                        <span className="text-muted-foreground font-sans text-sm ml-2">© 2025 All rights reserved</span>
+                        <span className="text-muted-foreground font-sans text-sm ml-2">© 2025 fnilvuwu. All rights reserved</span>
                     </div>
                     <nav className="flex items-center space-x-6">
                         <Link

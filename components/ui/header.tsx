@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Menu, RefreshCw, Search, X } from "lucide-react"
+import { Menu, Search, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -34,8 +34,8 @@ export function Header({ searchQuery = "", onSearchChange, onRefresh, loading = 
 
     const handleSearchChange = (value: string) => {
         setLocalSearchQuery(value)
-        if (pathname === "/" && onSearchChange) {
-            // Real-time search on home page
+        if (onSearchChange) {
+            // Execute real-time search on all pages that provide onSearchChange handler
             onSearchChange(value)
         }
     }

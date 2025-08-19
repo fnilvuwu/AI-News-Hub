@@ -1,15 +1,42 @@
+"use client"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Footer } from "@/components/ui/footer"
 import { Header } from "@/components/ui/header"
-import { Brain, Code, Database, Globe, Palette, Zap } from "lucide-react"
+import { Brain, Database, Globe, Palette, Zap } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
 
 export default function AboutPage() {
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    const [searchQuery, setSearchQuery] = useState("")
+
+    // Handle search functionality
+    const handleSearchChange = (query: string) => {
+        setSearchQuery(query)
+        if (query.trim()) {
+            // Automatically redirect to home page with search query
+            router.push(`/?search=${encodeURIComponent(query)}`)
+        }
+    }
+
+    // Initialize search query from URL params
+    useEffect(() => {
+        const urlSearch = searchParams.get('search') || ""
+        setSearchQuery(urlSearch)
+    }, [searchParams])
+
     return (
         <div className="min-h-screen bg-background">
-            <Header />
+            <Header
+                searchQuery={searchQuery}
+                onSearchChange={handleSearchChange}
+            />
 
             {/* Main Content */}
             <main className="container mx-auto px-4 py-12">
@@ -49,10 +76,16 @@ export default function AboutPage() {
                     <Card className="max-w-2xl mx-auto border-border bg-card">
                         <CardContent className="text-center p-8">
                             <div className="mb-6">
-                                <div className="w-24 h-24 bg-gradient-to-br from-primary to-accent rounded-full mx-auto mb-4 flex items-center justify-center">
-                                    <Code className="h-12 w-12 text-primary-foreground" />
+                                <div className="w-24 h-24 mx-auto mb-4 relative overflow-hidden rounded-full border-4 border-primary/20">
+                                    <Image
+                                        src="/fnilvuwu-photo.png"
+                                        alt="fnilvuwu - Developer"
+                                        fill
+                                        className="object-cover"
+                                        sizes="(max-width: 768px) 96px, 96px"
+                                    />
                                 </div>
-                                <h3 className="text-2xl font-serif font-bold text-foreground mb-2">fnilvuwu</h3>
+                                <h3 className="text-2xl font-serif font-bold text-foreground mb-2">Rahmatullah R</h3>
                                 <Badge variant="secondary" className="mb-4">Web Developer</Badge>
                             </div>
                             <p className="text-muted-foreground leading-relaxed mb-6">

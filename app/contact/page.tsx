@@ -9,16 +9,36 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Building, Code, Github, Linkedin, Mail, MessageSquare, Send, User } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
 
 export default function ContactPage() {
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    const [searchQuery, setSearchQuery] = useState("")
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         subject: '',
         message: ''
     })
+
+    // Handle search functionality
+    const handleSearchChange = (query: string) => {
+        setSearchQuery(query)
+        if (query.trim()) {
+            // Automatically redirect to home page with search query
+            router.push(`/?search=${encodeURIComponent(query)}`)
+        }
+    }
+
+    // Initialize search query from URL params
+    useEffect(() => {
+        const urlSearch = searchParams.get('search') || ""
+        setSearchQuery(urlSearch)
+    }, [searchParams])
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -36,7 +56,10 @@ export default function ContactPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            <Header />
+            <Header
+                searchQuery={searchQuery}
+                onSearchChange={handleSearchChange}
+            />
 
             {/* Main Content */}
             <main className="container mx-auto px-4 py-12">
@@ -138,10 +161,16 @@ export default function ContactPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-center mb-6">
-                                    <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-full mx-auto mb-4 flex items-center justify-center">
-                                        <Code className="h-10 w-10 text-primary-foreground" />
+                                    <div className="w-20 h-20 mx-auto mb-4 relative overflow-hidden rounded-full border-4 border-primary/20">
+                                        <Image
+                                            src="/fnilvuwu-photo.png"
+                                            alt="fnilvuwu - Developer"
+                                            fill
+                                            className="object-cover"
+                                            sizes="(max-width: 768px) 80px, 80px"
+                                        />
                                     </div>
-                                    <h3 className="text-2xl font-serif font-bold text-foreground mb-2">fnilvuwu</h3>
+                                    <h3 className="text-2xl font-serif font-bold text-foreground mb-2">Rahmatullah R</h3>
                                     <Badge variant="secondary" className="mb-2">Web Developer</Badge>
                                     <p className="text-muted-foreground">
                                         Passionate about creating modern, user-friendly web applications with clean code and great user experience.
