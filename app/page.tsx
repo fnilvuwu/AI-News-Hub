@@ -11,7 +11,7 @@ import { LoadMoreButton } from "@/components/ui/load-more-button"
 import { LoadingIndicator } from "@/components/ui/loading-indicator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useNews } from "@/hooks/use-news"
-import { AlertCircle, Clock, ExternalLink, Eye, Search } from "lucide-react"
+import { Newspaper, AlertCircle, Clock, ExternalLink, Eye, Search } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
@@ -110,7 +110,8 @@ export default function NewsPortal() {
             {/* Header with Search and Sort Controls */}
             <div className="flex flex-col gap-6 mb-8">
               {/* Enhanced Header */}
-              <div className="text-center lg:text-left">
+              <div className="text-center">
+                <Newspaper className="h-16 w-16 text-primary mx-auto mb-4" />
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-foreground mb-2 leading-tight">
                   {searchQuery ? "Search Results" : "Latest AI News"}
                 </h1>
