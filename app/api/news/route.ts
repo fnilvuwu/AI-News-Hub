@@ -26,7 +26,6 @@ export async function GET(request: NextRequest) {
             const searchLower = search.toLowerCase()
             articles = articles.filter(article =>
                 article.headline.toLowerCase().includes(searchLower) ||
-                article.category.toLowerCase().includes(searchLower) ||
                 article.summary.toLowerCase().includes(searchLower)
             )
         }

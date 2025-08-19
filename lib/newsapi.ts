@@ -18,56 +18,6 @@ function generateViewCount(): string {
     return views.toString()
 }
 
-// Categorize articles based on title and description with enhanced keyword matching
-function categorizeArticle(title: string, description: string | null): string {
-    const content = `${title} ${description || ''}`.toLowerCase()
-
-    // AI Models & LLMs
-    const modelKeywords = ['openai', 'gpt', 'chatgpt', 'claude', 'gemini', 'llama', 'language model', 'llm', 'transformer', 'neural network', 'deep learning', 'machine learning', 'anthropic', 'mistral', 'palm', 'bard']
-    if (modelKeywords.some(keyword => content.includes(keyword))) {
-        return 'AI Models'
-    }
-
-    // AI Research & Breakthroughs
-    const researchKeywords = ['research', 'study', 'breakthrough', 'discovery', 'paper', 'arxiv', 'experiment', 'algorithm', 'intelligence', 'cognitive', 'neural', 'academic', 'university', 'mit', 'stanford', 'deepmind']
-    if (researchKeywords.some(keyword => content.includes(keyword))) {
-        return 'AI Research'
-    }
-
-    // Autonomous AI & Robotics
-    const autonomousKeywords = ['autonomous', 'self-driving', 'tesla', 'robotics', 'robot', 'automation', 'autopilot', 'waymo', 'cruise', 'drone', 'unmanned', 'self-driving', 'autonomous vehicle']
-    if (autonomousKeywords.some(keyword => content.includes(keyword))) {
-        return 'Autonomous AI'
-    }
-
-    // AI in Healthcare
-    const healthcareKeywords = ['healthcare', 'medical', 'drug', 'disease', 'diagnosis', 'treatment', 'patient', 'medicine', 'clinical', 'biotech', 'pharmaceutical', 'health', 'cancer', 'therapy']
-    if (healthcareKeywords.some(keyword => content.includes(keyword))) {
-        return 'AI Healthcare'
-    }
-
-    // AI Tools & Applications
-    const toolKeywords = ['tool', 'productivity', 'copilot', 'assistant', 'app', 'software', 'platform', 'api', 'integration', 'workflow', 'automation', 'business', 'enterprise', 'saas']
-    if (toolKeywords.some(keyword => content.includes(keyword))) {
-        return 'AI Tools'
-    }
-
-    // AI Hardware & Infrastructure
-    const hardwareKeywords = ['chip', 'nvidia', 'processor', 'hardware', 'gpu', 'tpu', 'semiconductor', 'computing', 'infrastructure', 'data center', 'cloud', 'amd', 'intel', 'quantum']
-    if (hardwareKeywords.some(keyword => content.includes(keyword))) {
-        return 'AI Hardware'
-    }
-
-    // AI Ethics, Safety & Regulation
-    const ethicsKeywords = ['ethics', 'safety', 'regulation', 'policy', 'governance', 'bias', 'fairness', 'transparency', 'accountability', 'privacy', 'security', 'legislation', 'law', 'guidelines', 'responsible']
-    if (ethicsKeywords.some(keyword => content.includes(keyword))) {
-        return 'AI Ethics'
-    }
-
-    // Default to General AI for all other AI-related content
-    return 'General AI'
-}
-
 // Format timestamp to relative time
 function formatTimestamp(publishedAt: string): string {
     const now = new Date()
@@ -91,7 +41,6 @@ export function transformNewsAPIArticle(article: NewsAPIArticle, index: number):
         headline: article.title,
         link: article.url,
         timestamp: formatTimestamp(article.publishedAt),
-        category: categorizeArticle(article.title, article.description),
         summary: article.description || 'No description available',
         image: article.urlToImage,
         readTime: calculateReadTime(article.content, article.description),

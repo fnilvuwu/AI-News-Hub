@@ -150,54 +150,6 @@
 - [ ] **9.3** Implement form submission (consider using a service like Formspree)
 - [ ] **9.4** Add contact information and social links
 
-## 🎨 Phase 4: UI/UX Improvements
-
-### 10. Fix Dark Mode Issues
-**Priority: High** | **Estimated Time: 1 day**
-
-#### Sub-tasks:
-- [ ] **10.1** Fix "Read More" text hover issue in dark mode
-  - [ ] Locate the hover styling in article cards
-  - [ ] Update CSS to use proper dark mode colors
-  - [ ] Test hover states in both light and dark themes
-- [ ] **10.2** Fix default theme initialization
-  - [ ] Check `components/theme-provider.tsx`
-  - [ ] Ensure proper system theme detection
-  - [ ] Fix defaultTheme setting in layout
-- [ ] **10.3** Comprehensive dark mode testing
-  - [ ] Test all components in dark mode
-  - [ ] Verify color contrast ratios
-  - [ ] Check accessibility standards
-
-### 11. Add Image Placeholders
-**Priority: Medium** | **Estimated Time: 0.5 days**
-
-#### Sub-tasks:
-- [ ] **11.1** Create placeholder image component
-  - [ ] Design a news-themed placeholder
-  - [ ] Add to `components/ui/` folder
-- [ ] **11.2** Update article card component
-  - [ ] Add conditional rendering for missing images
-  - [ ] Implement fallback to placeholder
-- [ ] **11.3** Optimize image loading
-  - [ ] Add proper error handling for broken images
-  - [ ] Consider lazy loading implementation
-
-### 12. Improve Category Classification
-**Priority: Medium** | **Estimated Time: 1 day**
-
-#### Sub-tasks:
-- [ ] **12.1** Review current categorization logic in `lib/newsapi.ts`
-- [ ] **12.2** Expand keyword matching
-  - [ ] Add more comprehensive keyword lists
-  - [ ] Implement fuzzy matching for better accuracy
-- [ ] **12.3** Create "General AI" or "Technology" default category
-  - [ ] Replace "Unknown" with more descriptive default
-  - [ ] Update category colors and styling
-- [ ] **12.4** Add manual category override system
-  - [ ] Allow manual categorization for specific sources
-  - [ ] Create category mapping configuration
-
 ## 🔧 Phase 5: Technical Improvements
 
 ### 13. Performance Optimization
@@ -238,6 +190,6 @@
 4. **Add Phase 3** (Additional Pages) - Nice-to-have features
 5. **Finish with Phase 5** (Technical Improvements) - Polish and optimization
 
-## 📊 Estimated Total Time: 15-20 days
+## 📊 Estimated Total Time: 13.5-17.5 days
 
 Each phase can be worked on independently, and within each phase, sub-tasks can often be parallelized or tackled in different orders based on priority and dependencies.

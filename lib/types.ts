@@ -27,7 +27,6 @@ export interface Article {
     headline: string
     link: string
     timestamp: string
-    category: string
     summary: string
     image: string | null
     readTime: string
