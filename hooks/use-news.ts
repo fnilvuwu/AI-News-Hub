@@ -50,16 +50,13 @@ export function useNews(searchQuery: string = ''): UseNewsResult {
                 params.append('search', searchQuery.trim())
             }
 
-            // First page gets 19 articles (1 featured + 18 regular)
-            // Subsequent pages get 18 articles each
-            const pageSize = page === 1 ? 19 : 18
-            params.append('limit', pageSize.toString())
+            // Don't send limit - let API decide based on search vs browsing
             params.append('page', page.toString())
 
             console.log('📡 Making API request:', {
                 url: `/api/news?${params.toString()}`,
-                pageSize,
-                page
+                page,
+                isSearch: !!searchQuery.trim()
             })
 
             const response = await fetch(`/api/news?${params.toString()}`)
@@ -99,15 +96,21 @@ export function useNews(searchQuery: string = ''): UseNewsResult {
 
             setTotalResults(data.totalResults)
 
-            // Calculate total pages considering first page has 19 articles, rest have 18
-            const remainingAfterFirstPage = Math.max(0, data.totalResults - 19)
-            const additionalPages = Math.ceil(remainingAfterFirstPage / 18)
-            const calculatedTotalPages = data.totalResults <= 19 ? 1 : 1 + additionalPages
+            // Calculate total pages 
+            let calculatedTotalPages: number
+            if (searchQuery.trim()) {
+                // Search results: 18 articles per page
+                calculatedTotalPages = Math.ceil(data.totalResults / 18)
+            } else {
+                // Regular browsing: first page has 19 articles, rest have 18
+                const remainingAfterFirstPage = Math.max(0, data.totalResults - 19)
+                const additionalPages = Math.ceil(remainingAfterFirstPage / 18)
+                calculatedTotalPages = data.totalResults <= 19 ? 1 : 1 + additionalPages
+            }
 
             console.log('📊 Pagination calculation:', {
                 totalResults: data.totalResults,
-                remainingAfterFirstPage,
-                additionalPages,
+                isSearch: !!searchQuery.trim(),
                 calculatedTotalPages,
                 currentPage: page
             })

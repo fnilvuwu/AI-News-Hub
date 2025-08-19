@@ -3,123 +3,43 @@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Footer } from "@/components/ui/footer"
+import { Header } from "@/components/ui/header"
 import { ImagePlaceholder } from "@/components/ui/image-placeholder"
-import { Input } from "@/components/ui/input"
 import { LoadMoreButton } from "@/components/ui/load-more-button"
+import { LoadingIndicator } from "@/components/ui/loading-indicator"
 import { useNews } from "@/hooks/use-news"
-import { AlertCircle, Clock, ExternalLink, Eye, Menu, RefreshCw, Search, TrendingUp, X } from "lucide-react"
-import Image from "next/image"
-import { useState } from "react"
+import { AlertCircle, Clock, ExternalLink, Eye, TrendingUp } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
 
 export default function NewsPortal() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const searchParams = useSearchParams()
+  const initialSearch = searchParams.get('search') || ""
+  const [searchQuery, setSearchQuery] = useState(initialSearch)
 
   const { articles, loading, loadingMore, error, hasMore, refetch, loadMore } = useNews(searchQuery)
 
   const featuredArticle = articles.find((article) => article.featured)
   const regularArticles = articles.filter((article) => !article.featured)
 
+  // Update search query when URL search param changes
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || ""
+    setSearchQuery(urlSearch)
+  }, [searchParams])
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center">
-              <div className="w-8 h-8 mr-3 flex items-center justify-center">
-                <Image
-                  src="/ai-news-hub-logo.png"
-                  alt="AI News Hub Logo"
-                  width={32}
-                  height={32}
-                  className="rounded-lg"
-                />
-              </div>
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold text-primary">AI News Hub</h1>
-            </div>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-6">
-              <a href="#" className="text-foreground hover:text-primary transition-colors font-sans">
-                Home
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors font-sans">
-                Categories
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors font-sans">
-                About
-              </a>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={refetch}
-                disabled={loading}
-                className="ml-2"
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              </Button>
-            </nav>
-
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-          </div>
-
-          {/* Search Bar */}
-          <div className="mt-4 md:mt-4 lg:absolute lg:top-1/2 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 lg:mt-0">
-            <div className="relative lg:w-80">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="text"
-                placeholder="Search AI news..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-input border-border focus:ring-primary w-full"
-              />
-            </div>
-          </div>
-
-          {/* Mobile Navigation Menu */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden mt-4 pt-4 border-t border-border">
-              <nav className="flex flex-col space-y-3 items-center">
-                <a
-                  href="#"
-                  className="text-foreground hover:text-primary transition-colors font-sans py-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Home
-                </a>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-primary transition-colors font-sans py-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Categories
-                </a>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-primary transition-colors font-sans py-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  About
-                </a>
-              </nav>
-            </div>
-          )}
-        </div>
-      </header>
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onRefresh={refetch}
+        loading={loading}
+      />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-1">
         {/* Error Display */}
         {error && (
           <Alert variant="destructive" className="mb-6">
@@ -132,10 +52,7 @@ export default function NewsPortal() {
 
         {/* Loading State */}
         {loading && articles.length === 0 && (
-          <div className="flex items-center justify-center py-12">
-            <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-            <span className="ml-2 text-muted-foreground">Loading AI news...</span>
-          </div>
+          <LoadingIndicator message="Loading AI news..." />
         )}
 
         {/* Search Results Info */}
@@ -266,56 +183,30 @@ export default function NewsPortal() {
 
         {/* No Results */}
         {!loading && articles.length === 0 && searchQuery && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground font-sans text-lg mb-4">No AI articles found matching your search.</p>
-            <Button variant="outline" onClick={() => setSearchQuery("")} className="font-sans">
-              Clear Search
-            </Button>
+          <div className="flex flex-col items-center justify-center min-h-[50vh] w-full">
+            <div className="text-center space-y-4">
+              <p className="text-muted-foreground font-sans text-lg">No AI articles found matching your search.</p>
+              <Button variant="outline" onClick={() => setSearchQuery("")} className="font-sans">
+                Clear Search
+              </Button>
+            </div>
           </div>
         )}
 
         {/* No Articles State */}
         {!loading && articles.length === 0 && !searchQuery && !error && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground font-sans text-lg mb-4">No AI news available at the moment.</p>
-            <Button variant="outline" onClick={refetch} className="font-sans">
-              Refresh
-            </Button>
+          <div className="flex flex-col items-center justify-center min-h-[60vh] w-full">
+            <div className="text-center space-y-4">
+              <p className="text-muted-foreground font-sans text-lg">No AI news available at the moment.</p>
+              <Button variant="outline" onClick={refetch} className="font-sans">
+                Refresh
+              </Button>
+            </div>
           </div>
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-muted/30 mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 items-center">
-            <div className="flex items-center">
-              <div className="w-6 h-6 mr-2 flex items-center justify-center">
-                <Image
-                  src="/ai-news-hub-logo.png"
-                  alt="AI News Hub Logo"
-                  width={24}
-                  height={24}
-                  className="rounded"
-                />
-              </div>
-              <h3 className="text-lg font-serif font-bold text-primary">AI News Hub</h3>
-              <span className="text-muted-foreground font-sans text-sm ml-2">© 2025 All rights reserved</span>
-            </div>
-            <nav className="flex items-center space-x-6">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors font-sans text-sm">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors font-sans text-sm">
-                Terms of Service
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors font-sans text-sm">
-                Contact
-              </a>
-            </nav>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

@@ -6,8 +6,17 @@ export async function GET(request: NextRequest) {
     try {
         const searchParams = request.nextUrl.searchParams
         const search = searchParams.get('search')
-        const limit = parseInt(searchParams.get('limit') || '19')
         const page = parseInt(searchParams.get('page') || '1')
+
+        // Determine limit based on whether it's a search or regular browsing
+        let limit: number
+        if (search && search.trim()) {
+            // Search results: always 18 articles per page
+            limit = 18
+        } else {
+            // Regular browsing: 19 for first page, 18 for subsequent pages
+            limit = page === 1 ? 19 : 18
+        }
 
         console.log('🔍 API Request Details:', {
             search,
@@ -80,14 +89,22 @@ export async function GET(request: NextRequest) {
         }
 
         // Calculate pagination offset
-        // Page 1: 0-18 (19 articles including featured)
-        // Page 2: 19-36 (18 articles)
-        // Page 3: 37-54 (18 articles), etc.
+        // For search queries: 18 articles per page (no featured article)
+        // For regular browsing:
+        //   Page 1: 0-18 (19 articles including featured)
+        //   Page 2: 19-36 (18 articles)
+        //   Page 3: 37-54 (18 articles), etc.
         let offset: number
-        if (page === 1) {
-            offset = 0
+        if (search && search.trim()) {
+            // Search results: 18 articles per page, no featured article
+            offset = (page - 1) * 18
         } else {
-            offset = 19 + (page - 2) * 18
+            // Regular browsing with featured article on first page
+            if (page === 1) {
+                offset = 0
+            } else {
+                offset = 19 + (page - 2) * 18
+            }
         }
 
         console.log('📄 Pagination calculation:', {
