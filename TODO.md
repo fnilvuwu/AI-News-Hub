@@ -59,6 +59,7 @@
   - [ ] Implement for successful/failed actions
   - [ ] Use existing toast UI component
 
+### 15. Add Favicon
 ---
 
 ## 📋 Implementation Order Recommendation:
