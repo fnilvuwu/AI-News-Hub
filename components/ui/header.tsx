@@ -1,44 +1,15 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Menu, Search, X } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { useState } from "react"
 
-interface HeaderProps {
-    searchQuery?: string
-    onSearchChange?: (query: string) => void
-    onRefresh?: () => void
-    loading?: boolean
-}
-
-export function Header({ searchQuery = "", onSearchChange, onRefresh, loading = false }: HeaderProps) {
+export function Header() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-    const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
-    const router = useRouter()
     const pathname = usePathname()
-
-    const handleSearchSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        if (pathname !== "/") {
-            // If not on home page, redirect to home with search query
-            router.push(`/?search=${encodeURIComponent(localSearchQuery)}`)
-        } else if (onSearchChange) {
-            // If on home page, use the provided handler
-            onSearchChange(localSearchQuery)
-        }
-    }
-
-    const handleSearchChange = (value: string) => {
-        setLocalSearchQuery(value)
-        if (onSearchChange) {
-            // Execute real-time search on all pages that provide onSearchChange handler
-            onSearchChange(value)
-        }
-    }
 
     return (
         <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -92,20 +63,6 @@ export function Header({ searchQuery = "", onSearchChange, onRefresh, loading = 
                     >
                         {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </Button>
-                </div>
-
-                {/* Search Bar */}
-                <div className="mt-4 md:mt-4 lg:absolute lg:top-1/2 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 lg:mt-0">
-                    <form onSubmit={handleSearchSubmit} className="relative lg:w-80">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                        <Input
-                            type="text"
-                            placeholder="Search AI news..."
-                            value={localSearchQuery}
-                            onChange={(e) => handleSearchChange(e.target.value)}
-                            className="pl-10 bg-input border-border focus:ring-primary w-full"
-                        />
-                    </form>
                 </div>
 
                 {/* Mobile Navigation Menu */}

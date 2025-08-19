@@ -11,34 +11,15 @@ import { Textarea } from "@/components/ui/textarea"
 import { Building, Code, Github, Linkedin, Mail, MessageSquare, Send, User } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 export default function ContactPage() {
-    const searchParams = useSearchParams()
-    const router = useRouter()
-    const [searchQuery, setSearchQuery] = useState("")
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         subject: '',
         message: ''
     })
-
-    // Handle search functionality
-    const handleSearchChange = (query: string) => {
-        setSearchQuery(query)
-        if (query.trim()) {
-            // Automatically redirect to home page with search query
-            router.push(`/?search=${encodeURIComponent(query)}`)
-        }
-    }
-
-    // Initialize search query from URL params
-    useEffect(() => {
-        const urlSearch = searchParams.get('search') || ""
-        setSearchQuery(urlSearch)
-    }, [searchParams])
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -56,10 +37,7 @@ export default function ContactPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            <Header
-                searchQuery={searchQuery}
-                onSearchChange={handleSearchChange}
-            />
+            <Header />
 
             {/* Main Content */}
             <main className="container mx-auto px-4 py-12">

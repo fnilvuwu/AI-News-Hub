@@ -8,35 +8,12 @@ import { Header } from "@/components/ui/header"
 import { Brain, Database, Globe, Palette, Zap } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
 
 export default function AboutPage() {
-    const searchParams = useSearchParams()
-    const router = useRouter()
-    const [searchQuery, setSearchQuery] = useState("")
-
-    // Handle search functionality
-    const handleSearchChange = (query: string) => {
-        setSearchQuery(query)
-        if (query.trim()) {
-            // Automatically redirect to home page with search query
-            router.push(`/?search=${encodeURIComponent(query)}`)
-        }
-    }
-
-    // Initialize search query from URL params
-    useEffect(() => {
-        const urlSearch = searchParams.get('search') || ""
-        setSearchQuery(urlSearch)
-    }, [searchParams])
 
     return (
         <div className="min-h-screen bg-background">
-            <Header
-                searchQuery={searchQuery}
-                onSearchChange={handleSearchChange}
-            />
+            <Header />
 
             {/* Main Content */}
             <main className="container mx-auto px-4 py-12">

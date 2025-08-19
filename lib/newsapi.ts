@@ -37,17 +37,19 @@ function formatTimestamp(publishedAt: string): string {
 // Convert NewsAPI article to our Article format
 export function transformNewsAPIArticle(article: NewsAPIArticle, index: number): Article {
     return {
-        id: `${Date.now()}-${index}`,
+        id: `newsapi-${Date.now()}-${index}`,
         headline: article.title,
         link: article.url,
-        timestamp: formatTimestamp(article.publishedAt),
         summary: article.description || 'No description available',
         image: article.urlToImage,
         readTime: calculateReadTime(article.content, article.description),
         views: generateViewCount(),
-        featured: index === 0, // Make first article featured
         author: article.author || undefined,
-        publishedAt: article.publishedAt
+        publishedAt: article.publishedAt,
+        source: 'NewsAPI',
+        sourceId: 'newsapi',
+        section: undefined, // NewsAPI doesn't provide section info
+        tags: undefined     // NewsAPI doesn't provide tags
     }
 }
 

@@ -26,14 +26,16 @@ export interface Article {
     id: string
     headline: string
     link: string
-    timestamp: string
     summary: string
     image: string | null
     readTime: string
     views: string
-    featured: boolean
     author?: string
     publishedAt: string
+    source?: string        // Source name (e.g., "NewsAPI", "The Guardian")
+    sourceId?: string      // Source identifier (e.g., "newsapi", "guardian")
+    section?: string       // Article section/category
+    tags?: string[]        // Article tags
 }
 
 export interface NewsResponse {

@@ -1,5 +1,6 @@
+import { GuardianAPI } from '@/lib/guardianapi'
 import { fetchAINews, transformNewsAPIArticle } from '@/lib/newsapi'
-import { NewsResponse } from '@/lib/types'
+import { Article, NewsResponse } from '@/lib/types'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -25,102 +26,148 @@ export async function GET(request: NextRequest) {
             timestamp: new Date().toISOString()
         })
 
-        // Fetch AI news from NewsAPI
-        const newsData = await fetchAINews()
-        console.log('📰 Raw NewsAPI Response:', {
-            totalArticles: newsData.articles.length,
-            status: newsData.status
+        // Initialize all articles array
+        let allArticles: Article[] = []
+
+        // Calculate how many articles we need total (for proper multi-source pagination)
+        const articlesNeeded = page * 18
+
+        // Fetch from NewsAPI - get more articles for later pages
+        try {
+            const newsData = await fetchAINews()
+            console.log('📰 Raw NewsAPI Response:', {
+                totalArticles: newsData.articles.length,
+                status: newsData.status
+            })
+
+            // Transform and filter NewsAPI articles
+            const newsAPIArticles = newsData.articles
+                .filter(article => {
+                    return article.title &&
+                        article.description &&
+                        article.title !== '[Removed]' &&
+                        article.description !== '[Removed]'
+                })
+                .filter(article => isAIRelated(article.title, article.description))
+                .map((article, index) => transformNewsAPIArticle(article, index))
+
+            allArticles.push(...newsAPIArticles)
+            console.log('✅ NewsAPI articles:', newsAPIArticles.length)
+
+            // Log first few NewsAPI articles to check dates
+            if (newsAPIArticles.length > 0) {
+                console.log('📰 First 3 NewsAPI articles:')
+                newsAPIArticles.slice(0, 3).forEach((article, i) => {
+                    console.log(`${i + 1}. [${article.source}] ${article.publishedAt} - ${article.headline.substring(0, 50)}...`)
+                })
+            }
+        } catch (error) {
+            console.error('❌ NewsAPI failed:', error)
+        }
+
+        // Fetch from The Guardian API - get more articles for later pages
+        try {
+            const guardianApiKey = process.env.GUARDIAN_API_KEY
+            if (guardianApiKey) {
+                const guardianAPI = new GuardianAPI(guardianApiKey)
+
+                // Fetch multiple pages from Guardian to ensure we have enough articles
+                const pagesToFetch = Math.min(3, Math.ceil(articlesNeeded / 20)) // Guardian returns 20 per page
+                console.log(`🔍 Fetching ${pagesToFetch} pages from Guardian API for page ${page}`)
+
+                for (let guardianPage = 1; guardianPage <= pagesToFetch; guardianPage++) {
+                    const guardianData = await guardianAPI.searchArticles({
+                        q: search || undefined,
+                        pageSize: 20,
+                        page: guardianPage,
+                        orderBy: 'newest'
+                    })
+
+                    const guardianArticles = guardianData.response.results
+                        .map((article, index) => guardianAPI.transformArticle(article, allArticles.length + index))
+
+                    allArticles.push(...guardianArticles)
+                    console.log(`✅ Guardian articles (page ${guardianPage}):`, guardianArticles.length)
+                }
+
+                // Log first few Guardian articles to check dates
+                const allGuardianArticles = allArticles.filter(a => a.source === 'The Guardian')
+                if (allGuardianArticles.length > 0) {
+                    console.log('🏛️ First 3 Guardian articles:')
+                    allGuardianArticles.slice(0, 3).forEach((article, i) => {
+                        console.log(`${i + 1}. [${article.source}] ${article.publishedAt} - ${article.headline.substring(0, 50)}...`)
+                    })
+                }
+            } else {
+                console.log('⚠️ Guardian API key not configured, skipping')
+            }
+        } catch (error) {
+            console.error('❌ Guardian API failed:', error)
+        } console.log('🔄 Combined articles from all sources:', {
+            totalArticles: allArticles.length,
+            sources: [...new Set(allArticles.map(a => a.source))].filter(Boolean)
         })
 
-        // Transform articles to our format and filter out invalid ones
-        const initialCount = newsData.articles.length
-        let filteredCount = 0
-        let aiFilteredCount = 0
-
-        let articles = newsData.articles
-            .filter(article => {
-                const isValid = article.title &&
-                    article.description &&
-                    article.title !== '[Removed]' &&
-                    article.description !== '[Removed]'
-
-                if (isValid) filteredCount++
-                return isValid
-            })
-            .filter(article => {
-                const isAI = isAIRelated(article.title, article.description)
-                if (isAI) aiFilteredCount++
-                return isAI
-            })
-            .map((article, index) => transformNewsAPIArticle(article, index))
-
-        console.log('🔄 Filtering process:', {
-            initialCount,
-            afterValidityFilter: filteredCount,
-            afterAIFilter: aiFilteredCount,
-            finalCount: articles.length,
-            removedByValidity: initialCount - filteredCount,
-            removedByAIFilter: filteredCount - aiFilteredCount
+        // Deduplicate articles by URL to prevent duplicates from different sources
+        const seenUrls = new Set<string>()
+        allArticles = allArticles.filter(article => {
+            if (seenUrls.has(article.link)) {
+                return false
+            }
+            seenUrls.add(article.link)
+            return true
         })
 
-        console.log('🔄 After filtering and transformation:', {
-            filteredArticles: articles.length,
-            originalCount: newsData.articles.length
+        console.log('🔄 After deduplication:', {
+            totalArticles: allArticles.length,
+            duplicatesRemoved: seenUrls.size - allArticles.length
         })
 
         // Sort by published date to ensure consistent ordering for pagination
-        articles = articles.sort((a, b) =>
-            new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-        )
+        allArticles = allArticles.sort((a: Article, b: Article) => {
+            const dateA = new Date(a.publishedAt).getTime()
+            const dateB = new Date(b.publishedAt).getTime()
+            return dateB - dateA // Newest first
+        })
+
+        // Log first few articles to verify sorting
+        console.log('📅 Top 5 articles after sorting:')
+        allArticles.slice(0, 5).forEach((article, i) => {
+            console.log(`${i + 1}. [${article.source}] ${article.publishedAt} - ${article.headline.substring(0, 50)}...`)
+        })
 
         // Filter by search query if provided
         if (search && search.trim()) {
             const searchLower = search.toLowerCase()
-            const beforeSearchFilter = articles.length
-            articles = articles.filter(article =>
+            const beforeSearchFilter = allArticles.length
+            allArticles = allArticles.filter((article: Article) =>
                 article.headline.toLowerCase().includes(searchLower) ||
                 article.summary.toLowerCase().includes(searchLower)
             )
             console.log('🔎 Search filtering:', {
                 searchQuery: search,
                 beforeFilter: beforeSearchFilter,
-                afterFilter: articles.length
+                afterFilter: allArticles.length
             })
         }
 
-        // Calculate pagination offset
-        // For search queries: 18 articles per page (no featured article)
-        // For regular browsing:
-        //   Page 1: 0-18 (19 articles including featured)
-        //   Page 2: 19-36 (18 articles)
-        //   Page 3: 37-54 (18 articles), etc.
-        let offset: number
-        if (search && search.trim()) {
-            // Search results: 18 articles per page, no featured article
-            offset = (page - 1) * 18
-        } else {
-            // Regular browsing with featured article on first page
-            if (page === 1) {
-                offset = 0
-            } else {
-                offset = 19 + (page - 2) * 18
-            }
-        }
+        // Calculate pagination offset - 18 articles per page for all cases
+        const offset = (page - 1) * 18
 
         console.log('📄 Pagination calculation:', {
             page,
             limit,
             offset,
-            totalAvailable: articles.length,
+            totalAvailable: allArticles.length,
             requestedEnd: offset + limit,
-            willGetArticles: Math.min(limit, Math.max(0, articles.length - offset))
+            willGetArticles: Math.min(limit, Math.max(0, allArticles.length - offset))
         })
 
-        const totalResults = articles.length
-        const paginatedArticles = articles.slice(offset, offset + limit)
+        const totalResults = allArticles.length
+        const paginatedArticles = allArticles.slice(offset, offset + limit)
 
         console.log('📋 Articles at pagination boundaries:', {
-            articleTitles: paginatedArticles.map((article, idx) => ({
+            articleTitles: paginatedArticles.map((article: Article, idx: number) => ({
                 index: offset + idx,
                 title: article.headline.substring(0, 50) + '...'
             }))
