@@ -6,24 +6,58 @@ export async function GET(request: NextRequest) {
     try {
         const searchParams = request.nextUrl.searchParams
         const search = searchParams.get('search')
-        const limit = parseInt(searchParams.get('limit') || '20')
-        // Prepare for pagination implementation
+        const limit = parseInt(searchParams.get('limit') || '19')
         const page = parseInt(searchParams.get('page') || '1')
+
+        console.log('🔍 API Request Details:', {
+            search,
+            limit,
+            page,
+            timestamp: new Date().toISOString()
+        })
 
         // Fetch AI news from NewsAPI
         const newsData = await fetchAINews()
+        console.log('📰 Raw NewsAPI Response:', {
+            totalArticles: newsData.articles.length,
+            status: newsData.status
+        })
 
         // Transform articles to our format and filter out invalid ones
+        const initialCount = newsData.articles.length
+        let filteredCount = 0
+        let aiFilteredCount = 0
+
         let articles = newsData.articles
-            .filter(article =>
-                article.title &&
-                article.description &&
-                article.title !== '[Removed]' &&
-                article.description !== '[Removed]' &&
-                // Additional AI content filtering
-                isAIRelated(article.title, article.description)
-            )
+            .filter(article => {
+                const isValid = article.title &&
+                    article.description &&
+                    article.title !== '[Removed]' &&
+                    article.description !== '[Removed]'
+
+                if (isValid) filteredCount++
+                return isValid
+            })
+            .filter(article => {
+                const isAI = isAIRelated(article.title, article.description)
+                if (isAI) aiFilteredCount++
+                return isAI
+            })
             .map((article, index) => transformNewsAPIArticle(article, index))
+
+        console.log('🔄 Filtering process:', {
+            initialCount,
+            afterValidityFilter: filteredCount,
+            afterAIFilter: aiFilteredCount,
+            finalCount: articles.length,
+            removedByValidity: initialCount - filteredCount,
+            removedByAIFilter: filteredCount - aiFilteredCount
+        })
+
+        console.log('🔄 After filtering and transformation:', {
+            filteredArticles: articles.length,
+            originalCount: newsData.articles.length
+        })
 
         // Sort by published date to ensure consistent ordering for pagination
         articles = articles.sort((a, b) =>
@@ -33,19 +67,57 @@ export async function GET(request: NextRequest) {
         // Filter by search query if provided
         if (search && search.trim()) {
             const searchLower = search.toLowerCase()
+            const beforeSearchFilter = articles.length
             articles = articles.filter(article =>
                 article.headline.toLowerCase().includes(searchLower) ||
                 article.summary.toLowerCase().includes(searchLower)
             )
+            console.log('🔎 Search filtering:', {
+                searchQuery: search,
+                beforeFilter: beforeSearchFilter,
+                afterFilter: articles.length
+            })
         }
 
-        // Apply pagination offset (ready for pagination implementation)
-        const offset = (page - 1) * limit
+        // Calculate pagination offset
+        // Page 1: 0-18 (19 articles including featured)
+        // Page 2: 19-36 (18 articles)
+        // Page 3: 37-54 (18 articles), etc.
+        let offset: number
+        if (page === 1) {
+            offset = 0
+        } else {
+            offset = 19 + (page - 2) * 18
+        }
+
+        console.log('📄 Pagination calculation:', {
+            page,
+            limit,
+            offset,
+            totalAvailable: articles.length,
+            requestedEnd: offset + limit,
+            willGetArticles: Math.min(limit, Math.max(0, articles.length - offset))
+        })
+
         const totalResults = articles.length
-        articles = articles.slice(offset, offset + limit)
+        const paginatedArticles = articles.slice(offset, offset + limit)
+
+        console.log('📋 Articles at pagination boundaries:', {
+            articleTitles: paginatedArticles.map((article, idx) => ({
+                index: offset + idx,
+                title: article.headline.substring(0, 50) + '...'
+            }))
+        })
+
+        console.log('✅ Final response:', {
+            returnedArticles: paginatedArticles.length,
+            totalResults,
+            hasMore: offset + limit < totalResults,
+            nextPageWouldStart: offset + limit
+        })
 
         const response: NewsResponse = {
-            articles,
+            articles: paginatedArticles,
             totalResults,
             status: 'ok'
         }
@@ -80,7 +152,9 @@ function isAIRelated(title: string, description: string | null): boolean {
     ]
 
     return aiKeywords.some(keyword => content.includes(keyword))
-}// Enable CORS for local development
+}
+
+// Enable CORS for local development
 export async function OPTIONS() {
     return new NextResponse(null, {
         status: 200,

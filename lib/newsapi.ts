@@ -81,8 +81,14 @@ export async function fetchAINews(): Promise<NewsAPIResponse> {
     url.searchParams.append('q', aiKeywords)
     url.searchParams.append('language', 'en')
     url.searchParams.append('sortBy', 'publishedAt') // Consistent sorting for pagination
-    url.searchParams.append('pageSize', '50')
+    url.searchParams.append('pageSize', '100') // Increased from 50 to 100 to get more articles
     url.searchParams.append('apiKey', apiKey)
+
+    console.log('🌐 Fetching from NewsAPI:', {
+        url: url.toString().replace(apiKey, 'HIDDEN'),
+        pageSize: 100,
+        timestamp: new Date().toISOString()
+    })
 
     const response = await fetch(url.toString(), {
         headers: {
@@ -94,5 +100,12 @@ export async function fetchAINews(): Promise<NewsAPIResponse> {
         throw new Error(`NewsAPI request failed: ${response.status} ${response.statusText}`)
     }
 
-    return await response.json()
+    const data = await response.json()
+    console.log('📡 NewsAPI raw response:', {
+        totalResults: data.totalResults,
+        articlesReturned: data.articles?.length || 0,
+        status: data.status
+    })
+
+    return data
 }

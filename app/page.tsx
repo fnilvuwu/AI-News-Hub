@@ -5,15 +5,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { ImagePlaceholder } from "@/components/ui/image-placeholder"
 import { Input } from "@/components/ui/input"
+import { LoadMoreButton } from "@/components/ui/load-more-button"
 import { useNews } from "@/hooks/use-news"
-import { AlertCircle, Brain, Clock, ExternalLink, Eye, Menu, RefreshCw, Search, TrendingUp, X } from "lucide-react"
+import { AlertCircle, Clock, ExternalLink, Eye, Menu, RefreshCw, Search, TrendingUp, X } from "lucide-react"
+import Image from "next/image"
 import { useState } from "react"
 
 export default function NewsPortal() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  const { articles, loading, error, refetch } = useNews(searchQuery)
+  const { articles, loading, loadingMore, error, hasMore, refetch, loadMore } = useNews(searchQuery)
 
   const featuredArticle = articles.find((article) => article.featured)
   const regularArticles = articles.filter((article) => !article.featured)
@@ -26,8 +28,14 @@ export default function NewsPortal() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg mr-3 flex items-center justify-center">
-                <Brain className="h-4 w-4 text-primary-foreground" />
+              <div className="w-8 h-8 mr-3 flex items-center justify-center">
+                <Image
+                  src="/ai-news-hub-logo.png"
+                  alt="AI News Hub Logo"
+                  width={32}
+                  height={32}
+                  className="rounded-lg"
+                />
               </div>
               <h1 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold text-primary">AI News Hub</h1>
             </div>
@@ -245,6 +253,14 @@ export default function NewsPortal() {
                 </Card>
               ))}
             </div>
+
+            {/* Load More Button */}
+            <LoadMoreButton
+              onLoadMore={loadMore}
+              loading={loadingMore}
+              hasMore={hasMore}
+              className="mt-8"
+            />
           </section>
         )}
 
@@ -274,8 +290,14 @@ export default function NewsPortal() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 items-center">
             <div className="flex items-center">
-              <div className="w-6 h-6 bg-gradient-to-br from-primary to-accent rounded mr-2 flex items-center justify-center">
-                <Brain className="h-3 w-3 text-primary-foreground" />
+              <div className="w-6 h-6 mr-2 flex items-center justify-center">
+                <Image
+                  src="/ai-news-hub-logo.png"
+                  alt="AI News Hub Logo"
+                  width={24}
+                  height={24}
+                  className="rounded"
+                />
               </div>
               <h3 className="text-lg font-serif font-bold text-primary">AI News Hub</h3>
               <span className="text-muted-foreground font-sans text-sm ml-2">© 2025 All rights reserved</span>

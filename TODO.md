@@ -1,52 +1,5 @@
 # AI News Hub - Detailed TODO List
 
-## 🚀 Phase 1: Core Functionality Improvements
-
-### 1. Implement Pagination System
-**Priority: High** | **Estimated Time: 2-3 days**
-
-#### Sub-tasks:
-- [ ] **1.1** Create pagination state management in `use-news.ts` hook
-  - [ ] Add `currentPage`, `totalPages`, `hasNextPage`, `hasPrevPage` states
-  - [ ] Add `goToPage`, `nextPage`, `prevPage` functions
-- [ ] **1.2** Update API route (`/api/news/route.ts`) to support pagination
-  - [ ] Add `page` and `pageSize` query parameters
-  - [ ] Implement proper offset calculation
-  - [ ] Return pagination metadata in response
-- [ ] **1.3** Create Pagination UI component
-  - [ ] Design pagination component using existing UI library
-  - [ ] Add page numbers, previous/next buttons
-  - [ ] Show current page and total pages
-- [ ] **1.4** Integrate pagination into main page
-  - [ ] Update `page.tsx` to use pagination component
-  - [ ] Handle page changes and loading states
-- [ ] **1.5** Testing
-  - [ ] Test pagination with different page sizes
-  - [ ] Ensure proper loading states
-  - [ ] Test edge cases (first/last page)
-
-### 3. Implement Load More / Infinite Scroll
-**Priority: High** | **Estimated Time: 2-3 days**
-
-#### Sub-tasks:
-- [ ] **3.1** Choose implementation approach
-  - [ ] Decide between "Load More" button vs infinite scroll
-  - [ ] Consider user experience and performance
-- [ ] **3.2** Update data fetching logic
-  - [ ] Modify `use-news.ts` to support incremental loading
-  - [ ] Add `loadMore` function and `hasMore` state
-  - [ ] Implement article accumulation (append new articles)
-- [ ] **3.3** Update API to support cursor-based pagination
-  - [ ] Add `offset` parameter support
-  - [ ] Return `hasMore` flag in response
-- [ ] **3.4** Implement UI component
-  - [ ] Create "Load More" button component OR
-  - [ ] Implement intersection observer for infinite scroll
-- [ ] **3.5** Integration and optimization
-  - [ ] Add loading states for incremental loads
-  - [ ] Prevent duplicate requests
-  - [ ] Handle error states during load more
-
 ## 🔌 Phase 2: API Integration Expansion
 
 ### 4. Implement 2 Additional API Sources
