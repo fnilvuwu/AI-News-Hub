@@ -17,8 +17,8 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: "NewsHub - Your Daily News Portal",
-  description: "Stay informed with the latest news and headlines from around the world",
+  title: "AI News Hub – Latest AI Trends & Insights",
+  description: "Stay ahead with breaking AI updates, global news, and the latest trends shaping the future.",
   generator: "AI News Hub",
 }
 

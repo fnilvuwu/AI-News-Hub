@@ -18,33 +18,54 @@ function generateViewCount(): string {
     return views.toString()
 }
 
-// Categorize articles based on title and description
+// Categorize articles based on title and description with enhanced keyword matching
 function categorizeArticle(title: string, description: string | null): string {
     const content = `${title} ${description || ''}`.toLowerCase()
 
-    if (content.includes('openai') || content.includes('gpt') || content.includes('chatgpt') || content.includes('language model')) {
+    // AI Models & LLMs
+    const modelKeywords = ['openai', 'gpt', 'chatgpt', 'claude', 'gemini', 'llama', 'language model', 'llm', 'transformer', 'neural network', 'deep learning', 'machine learning', 'anthropic', 'mistral', 'palm', 'bard']
+    if (modelKeywords.some(keyword => content.includes(keyword))) {
         return 'AI Models'
     }
-    if (content.includes('research') || content.includes('study') || content.includes('breakthrough') || content.includes('discovery')) {
+
+    // AI Research & Breakthroughs
+    const researchKeywords = ['research', 'study', 'breakthrough', 'discovery', 'paper', 'arxiv', 'experiment', 'algorithm', 'intelligence', 'cognitive', 'neural', 'academic', 'university', 'mit', 'stanford', 'deepmind']
+    if (researchKeywords.some(keyword => content.includes(keyword))) {
         return 'AI Research'
     }
-    if (content.includes('autonomous') || content.includes('self-driving') || content.includes('tesla') || content.includes('robotics')) {
+
+    // Autonomous AI & Robotics
+    const autonomousKeywords = ['autonomous', 'self-driving', 'tesla', 'robotics', 'robot', 'automation', 'autopilot', 'waymo', 'cruise', 'drone', 'unmanned', 'self-driving', 'autonomous vehicle']
+    if (autonomousKeywords.some(keyword => content.includes(keyword))) {
         return 'Autonomous AI'
     }
-    if (content.includes('healthcare') || content.includes('medical') || content.includes('drug') || content.includes('disease')) {
+
+    // AI in Healthcare
+    const healthcareKeywords = ['healthcare', 'medical', 'drug', 'disease', 'diagnosis', 'treatment', 'patient', 'medicine', 'clinical', 'biotech', 'pharmaceutical', 'health', 'cancer', 'therapy']
+    if (healthcareKeywords.some(keyword => content.includes(keyword))) {
         return 'AI Healthcare'
     }
-    if (content.includes('tool') || content.includes('productivity') || content.includes('copilot') || content.includes('assistant')) {
+
+    // AI Tools & Applications
+    const toolKeywords = ['tool', 'productivity', 'copilot', 'assistant', 'app', 'software', 'platform', 'api', 'integration', 'workflow', 'automation', 'business', 'enterprise', 'saas']
+    if (toolKeywords.some(keyword => content.includes(keyword))) {
         return 'AI Tools'
     }
-    if (content.includes('chip') || content.includes('nvidia') || content.includes('processor') || content.includes('hardware')) {
+
+    // AI Hardware & Infrastructure
+    const hardwareKeywords = ['chip', 'nvidia', 'processor', 'hardware', 'gpu', 'tpu', 'semiconductor', 'computing', 'infrastructure', 'data center', 'cloud', 'amd', 'intel', 'quantum']
+    if (hardwareKeywords.some(keyword => content.includes(keyword))) {
         return 'AI Hardware'
     }
-    if (content.includes('ethics') || content.includes('safety') || content.includes('regulation') || content.includes('policy')) {
+
+    // AI Ethics, Safety & Regulation
+    const ethicsKeywords = ['ethics', 'safety', 'regulation', 'policy', 'governance', 'bias', 'fairness', 'transparency', 'accountability', 'privacy', 'security', 'legislation', 'law', 'guidelines', 'responsible']
+    if (ethicsKeywords.some(keyword => content.includes(keyword))) {
         return 'AI Ethics'
     }
 
-    return 'AI Research' // Default category
+    // Default to General AI for all other AI-related content
+    return 'General AI'
 }
 
 // Format timestamp to relative time

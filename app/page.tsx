@@ -4,6 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { ImagePlaceholder } from "@/components/ui/image-placeholder"
 import { Input } from "@/components/ui/input"
 import { useNews } from "@/hooks/use-news"
 import { AlertCircle, Brain, Clock, ExternalLink, Eye, Menu, RefreshCw, Search, TrendingUp, X } from "lucide-react"
@@ -17,6 +18,7 @@ const categoryColors = {
   "AI Tools": "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
   "AI Hardware": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
   "AI Ethics": "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200",
+  "General AI": "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
 }
 
 export default function NewsPortal() {
@@ -158,10 +160,11 @@ export default function NewsPortal() {
             <Card className="overflow-hidden border-border bg-card hover:shadow-xl transition-all duration-300">
               <div className="md:flex">
                 <div className="md:w-1/2">
-                  <img
-                    src={featuredArticle.image || "/placeholder.svg"}
+                  <ImagePlaceholder
+                    src={featuredArticle.image}
                     alt={featuredArticle.headline}
-                    className="w-full h-64 md:h-full object-cover"
+                    className="w-full h-64 md:h-full"
+                    aspectRatio="auto"
                   />
                 </div>
                 <div className="md:w-1/2 p-6">
@@ -214,10 +217,11 @@ export default function NewsPortal() {
                   className="group hover:shadow-lg transition-all duration-200 border-border bg-card overflow-hidden"
                 >
                   <div className="relative overflow-hidden">
-                    <img
-                      src={article.image || "/placeholder.svg"}
+                    <ImagePlaceholder
+                      src={article.image}
                       alt={article.headline}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-48 group-hover:scale-105 transition-transform duration-300"
+                      aspectRatio="auto"
                     />
                     <div className="absolute top-3 left-3">
                       <Badge className={categoryColors[article.category as keyof typeof categoryColors]}>
@@ -248,7 +252,7 @@ export default function NewsPortal() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors font-sans bg-transparent"
+                        className="group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors font-sans bg-transparent border-border dark:border-border dark:text-foreground dark:hover:bg-primary dark:hover:text-primary-foreground"
                         asChild
                       >
                         <a href={article.link} target="_blank" rel="noopener noreferrer" className="flex items-center">
