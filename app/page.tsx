@@ -88,42 +88,6 @@ export default function NewsPortal() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 flex-1">
-        {/* Search Input - Always visible at the top */}
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="text"
-                placeholder="Search AI news..."
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                className="pl-10 bg-input border-border focus:ring-primary w-full"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground font-sans whitespace-nowrap">Sort by:</span>
-              <Select value={sortBy} onValueChange={(value: 'date' | 'title' | 'views') => setSortBy(value)}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="date">Latest</SelectItem>
-                  <SelectItem value="title">Title A-Z</SelectItem>
-                  <SelectItem value="views">Most Views</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          {((inputValue !== searchQuery && inputValue.length > 0) || (searchQuery && loading) || isClearing) && (
-            <div className="mt-4">
-              <LoadingIndicator
-                message={isClearing ? "Clearing search..." : "Searching..."}
-                compact={true}
-              />
-            </div>
-          )}
-        </div>
 
         {/* Error Display */}
         {error && (
@@ -135,36 +99,81 @@ export default function NewsPortal() {
           </Alert>
         )}
 
-        {/* Loading State */}
+        {/* Loading State - Only show when no articles are available */}
         {loading && articles.length === 0 && (
           <LoadingIndicator message="Loading AI news..." />
         )}
 
-        {/* Search Results Info */}
-        {searchQuery && !loading && (
-          <div className="mb-6 flex items-center justify-between">
-            <p className="text-muted-foreground font-sans">
-              {sortedArticles.length} article{sortedArticles.length !== 1 ? "s" : ""} found for "{searchQuery}"
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleClearSearch}
-              disabled={isClearing}
-              className="font-sans"
-            >
-              {isClearing ? "Clearing..." : "Clear Search"}
-            </Button>
-          </div>
-        )}
-
-        {!loading && sortedArticles.length > 0 && (
+        {/* Main content - Show articles if we have any, regardless of loading state */}
+        {sortedArticles.length > 0 && (
           <section>
-            <div className="flex items-center mb-6">
-              <h2 className="text-xl font-serif font-bold text-foreground">
-                {searchQuery ? "Search Results" : "Latest AI News"}
-              </h2>
-            </div>
+            {/* Header with Search and Sort Controls */}
+            <div className="flex flex-col gap-6 mb-8">
+              {/* Enhanced Header */}
+              <div className="text-center lg:text-left">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-foreground mb-2 leading-tight">
+                  {searchQuery ? "Search Results" : "Latest AI News"}
+                </h1>
+                {!searchQuery && (
+                  <p className="text-muted-foreground font-sans mt-3 text-lg">
+                    Stay updated with the latest developments in artificial intelligence
+                  </p>
+                )}
+              </div>
+
+              {/* Search and Sort Controls - Full Width */}
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    type="text"
+                    placeholder="Search AI news..."
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    className="pl-10 bg-input border-border focus:ring-primary w-full"
+                  />
+                </div>
+                <div className="flex items-center gap-2 sm:min-w-fit">
+                  <span className="text-sm text-muted-foreground font-sans whitespace-nowrap">Sort by:</span>
+                  <Select value={sortBy} onValueChange={(value: 'date' | 'title' | 'views') => setSortBy(value)}>
+                    <SelectTrigger className="w-full sm:w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="date">Latest</SelectItem>
+                      <SelectItem value="title">Title A-Z</SelectItem>
+                      <SelectItem value="views">Most Views</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Search Results Info - Below search controls */}
+              {searchQuery && !loading && (
+                <div className="flex items-center justify-between mt-4">
+                  <p className="text-muted-foreground font-sans">
+                    {sortedArticles.length} article{sortedArticles.length !== 1 ? "s" : ""} found for "{searchQuery}"
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClearSearch}
+                    disabled={isClearing}
+                    className="font-sans"
+                  >
+                    {isClearing ? "Clearing..." : "Clear Search"}
+                  </Button>
+                </div>
+              )}
+            </div>            {/* Loading/Search Status */}
+            {((inputValue !== searchQuery && inputValue.length > 0) || (searchQuery && loading) || isClearing) && (
+              <div className="mb-6">
+                <LoadingIndicator
+                  message={isClearing ? "Clearing search..." : "Searching..."}
+                  compact={true}
+                />
+              </div>
+            )}
 
             {/* Hero Article - First article in a large format */}
             {!searchQuery && sortedArticles.length > 0 && (
@@ -287,7 +296,7 @@ export default function NewsPortal() {
           </section>
         )}
 
-        {/* No Results */}
+        {/* No Results - Only show when not loading or when loading is complete */}
         {!loading && sortedArticles.length === 0 && searchQuery && (
           <div className="flex flex-col items-center justify-center min-h-[50vh] w-full">
             <div className="text-center space-y-4">
