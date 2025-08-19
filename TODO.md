@@ -25,20 +25,6 @@
   - [ ] Ensure proper loading states
   - [ ] Test edge cases (first/last page)
 
-### 2. Remove Current Filtering Logic
-**Priority: Medium** | **Estimated Time: 1 day**
-
-#### Sub-tasks:
-- [ ] **2.1** Identify current filtering implementations
-  - [ ] Check `use-news.ts` for search-based filtering
-  - [ ] Review API route filtering logic
-- [ ] **2.2** Remove or simplify filtering
-  - [ ] Keep basic search functionality
-  - [ ] Remove complex category filtering if exists
-- [ ] **2.3** Update UI accordingly
-  - [ ] Remove filter UI elements if any
-  - [ ] Simplify search interface
-
 ### 3. Implement Load More / Infinite Scroll
 **Priority: High** | **Estimated Time: 2-3 days**
 

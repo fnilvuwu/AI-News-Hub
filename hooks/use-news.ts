@@ -22,7 +22,7 @@ export function useNews(searchQuery: string = ''): UseNewsResult {
             if (searchQuery.trim()) {
                 params.append('search', searchQuery.trim())
             }
-            params.append('limit', '20')
+            params.append('limit', '19')
 
             const response = await fetch(`/api/news?${params.toString()}`)
 

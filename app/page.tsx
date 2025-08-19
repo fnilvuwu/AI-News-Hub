@@ -82,7 +82,7 @@ export default function NewsPortal() {
           {/* Mobile Navigation Menu */}
           {isMobileMenuOpen && (
             <div className="md:hidden mt-4 pt-4 border-t border-border">
-              <nav className="flex flex-col space-y-3">
+              <nav className="flex flex-col space-y-3 items-center">
                 <a
                   href="#"
                   className="text-foreground hover:text-primary transition-colors font-sans py-2"
@@ -272,7 +272,7 @@ export default function NewsPortal() {
       {/* Footer */}
       <footer className="border-t border-border bg-muted/30 mt-16">
         <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 items-center">
             <div className="flex items-center">
               <div className="w-6 h-6 bg-gradient-to-br from-primary to-accent rounded mr-2 flex items-center justify-center">
                 <Brain className="h-3 w-3 text-primary-foreground" />

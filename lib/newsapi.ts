@@ -51,7 +51,7 @@ export function transformNewsAPIArticle(article: NewsAPIArticle, index: number):
     }
 }
 
-// Fetch AI news from NewsAPI
+// Fetch AI-specific news from NewsAPI
 export async function fetchAINews(): Promise<NewsAPIResponse> {
     const apiKey = process.env.NEWSAPI_API_KEY
 
@@ -59,25 +59,29 @@ export async function fetchAINews(): Promise<NewsAPIResponse> {
         throw new Error('NewsAPI key is not configured')
     }
 
-    const searchQueries = [
+    // Use specific AI keywords for consistent AI-focused results
+    const aiKeywords = [
         'artificial intelligence',
         'machine learning',
-        'AI technology',
-        'neural networks',
         'deep learning',
+        'neural networks',
+        'AI technology',
         'OpenAI',
         'ChatGPT',
+        'GPT',
+        'large language model',
+        'LLM',
+        'computer vision',
+        'natural language processing',
+        'robotics AI',
         'AI research'
-    ]
-
-    // Use multiple search terms to get more comprehensive AI news
-    const query = searchQueries.join(' OR ')
+    ].join(' OR ')
 
     const url = new URL('https://newsapi.org/v2/everything')
-    url.searchParams.append('q', query)
-    url.searchParams.append('sortBy', 'publishedAt')
+    url.searchParams.append('q', aiKeywords)
     url.searchParams.append('language', 'en')
-    url.searchParams.append('pageSize', '50') // Get more articles to filter from
+    url.searchParams.append('sortBy', 'publishedAt') // Consistent sorting for pagination
+    url.searchParams.append('pageSize', '50')
     url.searchParams.append('apiKey', apiKey)
 
     const response = await fetch(url.toString(), {
