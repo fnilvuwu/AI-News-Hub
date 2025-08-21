@@ -12,7 +12,7 @@ export function Footer() {
             <div className="container mx-auto px-4 py-8">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 items-center">
                     <div className="flex items-center">
-                        <span className="text-muted-foreground font-sans text-sm ml-2">©2025 fnilvuwu. All rights reserved</span>
+                        <span className="text-muted-foreground font-sans text-sm">©2025 fnilvuwu. All rights reserved</span>
                     </div>
                     <nav className="flex items-center space-x-6">
                         <Link

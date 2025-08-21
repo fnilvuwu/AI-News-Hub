@@ -126,10 +126,10 @@ export default function NewsPortal() {
                 )}
               </div>
 
-              {/* Search, Filter, and Sort Controls - Single responsive row */}
+              {/* Search, Filter, and Sort Controls - Responsive layout */}
               <div className="flex flex-col xl:flex-row gap-4 w-full">
-                {/* Search Input */}
-                <div className="relative flex-1 min-w-0">
+                {/* Search Input - Full width on mobile/tablet, part of row on xl+ */}
+                <div className="relative w-full xl:flex-1 xl:min-w-0">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
                     type="text"
@@ -140,93 +140,99 @@ export default function NewsPortal() {
                   />
                 </div>
 
-                {/* Source Filters */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-shrink-0">
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground font-sans whitespace-nowrap">Filter:</span>
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className="w-[200px] justify-between"
-                      >
-                        {sourceFilters.length === 3
-                          ? "All Sources"
-                          : sourceFilters.length === 0
-                            ? "No Sources"
-                            : `${sourceFilters.length} Selected`}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-0">
-                      <div className="p-2 space-y-2">
-                        {[
-                          { id: 'newsapi', label: 'NewsAPI', description: 'General news sources' },
-                          { id: 'guardian', label: 'The Guardian', description: 'UK newspaper' },
-                          { id: 'nytimes', label: 'NY Times', description: 'US newspaper' }
-                        ].map((source) => (
-                          <div key={source.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={source.id}
-                              checked={sourceFilters.includes(source.id)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSourceFilters(prev => [...prev, source.id])
-                                } else {
-                                  setSourceFilters(prev => prev.filter(id => id !== source.id))
-                                }
-                              }}
-                            />
-                            <label
-                              htmlFor={source.id}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                              title={source.description}
-                            >
-                              {source.label}
-                            </label>
-                          </div>
-                        ))}
-                        <div className="border-t pt-2 mt-2">
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex-1 text-xs"
-                              onClick={() => setSourceFilters(['newsapi', 'guardian', 'nytimes'])}
-                            >
-                              All
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex-1 text-xs"
-                              onClick={() => setSourceFilters([])}
-                            >
-                              None
-                            </Button>
-                          </div>
-                        </div>
+                {/* Filter and Sort Row - Responsive layout */}
+                <div className="flex flex-col xl:flex-row gap-4 w-full xl:w-auto">
+                  {/* Filter and Sort Container - Handles small screen stacking */}
+                  <div className="flex flex-col min-[470px]:flex-row gap-4 min-[470px]:justify-between w-full xl:w-auto xl:gap-4 xl:justify-start">
+                    {/* Source Filters */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground font-sans whitespace-nowrap">Filter:</span>
                       </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="w-[200px] justify-between"
+                          >
+                            {sourceFilters.length === 3
+                              ? "All Sources"
+                              : sourceFilters.length === 0
+                                ? "No Sources"
+                                : `${sourceFilters.length} Selected`}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                          <div className="p-2 space-y-2">
+                            {[
+                              { id: 'newsapi', label: 'NewsAPI', description: 'General news sources' },
+                              { id: 'guardian', label: 'The Guardian', description: 'UK newspaper' },
+                              { id: 'nytimes', label: 'NY Times', description: 'US newspaper' }
+                            ].map((source) => (
+                              <div key={source.id} className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={source.id}
+                                  checked={sourceFilters.includes(source.id)}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      setSourceFilters(prev => [...prev, source.id])
+                                    } else {
+                                      setSourceFilters(prev => prev.filter(id => id !== source.id))
+                                    }
+                                  }}
+                                />
+                                <label
+                                  htmlFor={source.id}
+                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                  title={source.description}
+                                >
+                                  {source.label}
+                                </label>
+                              </div>
+                            ))}
+                            <div className="border-t pt-2 mt-2">
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => setSourceFilters(['newsapi', 'guardian', 'nytimes'])}
+                                >
+                                  All
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => setSourceFilters([])}
+                                >
+                                  None
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
 
-                {/* Sort Dropdown */}
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-sm text-muted-foreground font-sans whitespace-nowrap">Sort:</span>
-                  <Select value={sortBy} onValueChange={(value: 'date' | 'title' | 'views') => setSortBy(value)}>
-                    <SelectTrigger className="w-[120px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="date">Latest</SelectItem>
-                      <SelectItem value="title">Title A-Z</SelectItem>
-                      <SelectItem value="views">Most Views</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    {/* Sort Dropdown */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-sm text-muted-foreground font-sans whitespace-nowrap">Sort:</span>
+                      <Select value={sortBy} onValueChange={(value: 'date' | 'title' | 'views') => setSortBy(value)}>
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="date">Latest</SelectItem>
+                          <SelectItem value="title">Title A-Z</SelectItem>
+                          <SelectItem value="views">Most Views</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
               </div>
 
