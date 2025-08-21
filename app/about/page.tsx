@@ -226,11 +226,11 @@ export default function AboutPage() {
                             <p className="text-muted-foreground mb-6">
                                 Discover the latest AI developments and stay ahead of the curve with our curated news feed.
                             </p>
-                            <div className="flex justify-center space-x-4">
-                                <Button asChild>
+                            <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                <Button asChild className="w-full sm:w-auto">
                                     <Link href="/">Browse Latest News</Link>
                                 </Button>
-                                <Button variant="outline" asChild>
+                                <Button variant="outline" asChild className="w-full sm:w-auto">
                                     <Link href="/contact">Contact Developer</Link>
                                 </Button>
                             </div>
