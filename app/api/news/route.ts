@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams
         const search = searchParams.get('search')
         const page = parseInt(searchParams.get('page') || '1')
+        const sources = searchParams.get('sources')?.split(',').filter(Boolean) || []
 
         // Determine limit based on whether it's a search or regular browsing
         let limit: number
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
             search,
             limit,
             page,
+            sources,
             timestamp: new Date().toISOString()
         })
 
@@ -34,115 +36,123 @@ export async function GET(request: NextRequest) {
         const articlesNeeded = page * 18
 
         // Fetch from NewsAPI - get more articles for later pages
-        try {
-            const newsData = await fetchAINews()
-            console.log('📰 Raw NewsAPI Response:', {
-                totalArticles: newsData.articles.length,
-                status: newsData.status
-            })
-
-            // Transform and filter NewsAPI articles
-            const newsAPIArticles = newsData.articles
-                .filter(article => {
-                    return article.title &&
-                        article.description &&
-                        article.title !== '[Removed]' &&
-                        article.description !== '[Removed]'
+        if (sources.length === 0 || sources.includes('newsapi')) {
+            try {
+                const newsData = await fetchAINews()
+                console.log('📰 Raw NewsAPI Response:', {
+                    totalArticles: newsData.articles.length,
+                    status: newsData.status
                 })
-                .filter(article => isAIRelated(article.title, article.description))
-                .map((article, index) => transformNewsAPIArticle(article, index))
 
-            allArticles.push(...newsAPIArticles)
-            console.log('✅ NewsAPI articles:', newsAPIArticles.length)
+                // Transform and filter NewsAPI articles
+                const newsAPIArticles = newsData.articles
+                    .filter(article => {
+                        return article.title &&
+                            article.description &&
+                            article.title !== '[Removed]' &&
+                            article.description !== '[Removed]'
+                    })
+                    .filter(article => isAIRelated(article.title, article.description))
+                    .map((article, index) => transformNewsAPIArticle(article, index))
 
-            // Log first few NewsAPI articles to check dates
-            if (newsAPIArticles.length > 0) {
-                console.log('📰 First 3 NewsAPI articles:')
-                newsAPIArticles.slice(0, 3).forEach((article, i) => {
-                    console.log(`${i + 1}. [${article.source}] ${article.publishedAt} - ${article.headline.substring(0, 50)}...`)
-                })
+                allArticles.push(...newsAPIArticles)
+                console.log('✅ NewsAPI articles:', newsAPIArticles.length)
+
+                // Log first few NewsAPI articles to check dates
+                if (newsAPIArticles.length > 0) {
+                    console.log('📰 First 3 NewsAPI articles:')
+                    newsAPIArticles.slice(0, 3).forEach((article, i) => {
+                        console.log(`${i + 1}. [${article.source}] ${article.publishedAt} - ${article.headline.substring(0, 50)}...`)
+                    })
+                }
+            } catch (error) {
+                console.error('❌ NewsAPI failed:', error)
             }
-        } catch (error) {
-            console.error('❌ NewsAPI failed:', error)
         }
 
         // Fetch from The Guardian API - get more articles for later pages
-        try {
-            const guardianApiKey = process.env.GUARDIAN_API_KEY
-            if (guardianApiKey) {
-                const guardianAPI = new GuardianAPI(guardianApiKey)
+        if (sources.length === 0 || sources.includes('guardian')) {
+            try {
+                const guardianApiKey = process.env.GUARDIAN_API_KEY
+                if (guardianApiKey) {
+                    const guardianAPI = new GuardianAPI(guardianApiKey)
 
-                // Fetch multiple pages from Guardian to ensure we have enough articles
-                const pagesToFetch = Math.min(3, Math.ceil(articlesNeeded / 20)) // Guardian returns 20 per page
-                console.log(`🔍 Fetching ${pagesToFetch} pages from Guardian API for page ${page}`)
+                    // Fetch multiple pages from Guardian to ensure we have enough articles
+                    const pagesToFetch = Math.min(3, Math.ceil(articlesNeeded / 20)) // Guardian returns 20 per page
+                    console.log(`🔍 Fetching ${pagesToFetch} pages from Guardian API for page ${page}`)
 
-                for (let guardianPage = 1; guardianPage <= pagesToFetch; guardianPage++) {
-                    const guardianData = await guardianAPI.searchArticles({
-                        q: search || undefined,
-                        pageSize: 20,
-                        page: guardianPage,
-                        orderBy: 'newest'
-                    })
+                    for (let guardianPage = 1; guardianPage <= pagesToFetch; guardianPage++) {
+                        const guardianData = await guardianAPI.searchArticles({
+                            q: search || undefined,
+                            pageSize: 20,
+                            page: guardianPage,
+                            orderBy: 'newest'
+                        })
 
-                    const guardianArticles = guardianData.response.results
-                        .map((article, index) => guardianAPI.transformArticle(article, allArticles.length + index))
+                        const guardianArticles = guardianData.response.results
+                            .map((article, index) => guardianAPI.transformArticle(article, allArticles.length + index))
 
-                    allArticles.push(...guardianArticles)
-                    console.log(`✅ Guardian articles (page ${guardianPage}):`, guardianArticles.length)
+                        allArticles.push(...guardianArticles)
+                        console.log(`✅ Guardian articles (page ${guardianPage}):`, guardianArticles.length)
+                    }
+
+                    // Log first few Guardian articles to check dates
+                    const allGuardianArticles = allArticles.filter(a => a.source === 'The Guardian')
+                    if (allGuardianArticles.length > 0) {
+                        console.log('🏛️ First 3 Guardian articles:')
+                        allGuardianArticles.slice(0, 3).forEach((article, i) => {
+                            console.log(`${i + 1}. [${article.source}] ${article.publishedAt} - ${article.headline.substring(0, 50)}...`)
+                        })
+                    }
+                } else {
+                    console.log('⚠️ Guardian API key not configured, skipping')
                 }
-
-                // Log first few Guardian articles to check dates
-                const allGuardianArticles = allArticles.filter(a => a.source === 'The Guardian')
-                if (allGuardianArticles.length > 0) {
-                    console.log('🏛️ First 3 Guardian articles:')
-                    allGuardianArticles.slice(0, 3).forEach((article, i) => {
-                        console.log(`${i + 1}. [${article.source}] ${article.publishedAt} - ${article.headline.substring(0, 50)}...`)
-                    })
-                }
-            } else {
-                console.log('⚠️ Guardian API key not configured, skipping')
+            } catch (error) {
+                console.error('❌ Guardian API failed:', error)
             }
-        } catch (error) {
-            console.error('❌ Guardian API failed:', error)
         }
 
         // Fetch from NYTimes API - use single request to avoid rate limits
-        try {
-            const nytimesApiKey = process.env.NYTIMES_API_KEY
-            if (nytimesApiKey) {
-                const nytimesAPI = new NYTimesAPI(nytimesApiKey)
+        if (sources.length === 0 || sources.includes('nytimes')) {
+            try {
+                const nytimesApiKey = process.env.NYTIMES_API_KEY
+                if (nytimesApiKey) {
+                    const nytimesAPI = new NYTimesAPI(nytimesApiKey)
 
-                // Fetch only one page from NYTimes to respect rate limits
-                console.log(`🔍 Fetching from NYTimes API for page ${page}`)
+                    // Fetch only one page from NYTimes to respect rate limits
+                    console.log(`🔍 Fetching from NYTimes API for page ${page}`)
 
-                const nytimesData = await nytimesAPI.searchArticles({
-                    q: search || undefined,
-                    page: Math.min(page - 1, 0), // NYTimes uses 0-based page numbering, but don't go beyond page 0 for rate limiting
-                    sort: 'newest'
-                })
-
-                // Handle case where docs might be null or empty
-                const docs = nytimesData.response.docs || []
-                const nytimesArticles = docs
-                    .map((article, index) => nytimesAPI.transformArticle(article, allArticles.length + index))
-
-                allArticles.push(...nytimesArticles)
-                console.log(`✅ NYTimes articles:`, nytimesArticles.length)
-
-                // Log first few NYTimes articles to check dates
-                const allNYTimesArticles = allArticles.filter(a => a.source === 'The New York Times')
-                if (allNYTimesArticles.length > 0) {
-                    console.log('🗞️ First 3 NYTimes articles:')
-                    allNYTimesArticles.slice(0, 3).forEach((article, i) => {
-                        console.log(`${i + 1}. [${article.source}] ${article.publishedAt} - ${article.headline.substring(0, 50)}...`)
+                    const nytimesData = await nytimesAPI.searchArticles({
+                        q: search || undefined,
+                        page: Math.min(page - 1, 0), // NYTimes uses 0-based page numbering, but don't go beyond page 0 for rate limiting
+                        sort: 'newest'
                     })
+
+                    // Handle case where docs might be null or empty
+                    const docs = nytimesData.response.docs || []
+                    const nytimesArticles = docs
+                        .map((article, index) => nytimesAPI.transformArticle(article, allArticles.length + index))
+
+                    allArticles.push(...nytimesArticles)
+                    console.log(`✅ NYTimes articles:`, nytimesArticles.length)
+
+                    // Log first few NYTimes articles to check dates
+                    const allNYTimesArticles = allArticles.filter(a => a.source === 'The New York Times')
+                    if (allNYTimesArticles.length > 0) {
+                        console.log('🗞️ First 3 NYTimes articles:')
+                        allNYTimesArticles.slice(0, 3).forEach((article, i) => {
+                            console.log(`${i + 1}. [${article.source}] ${article.publishedAt} - ${article.headline.substring(0, 50)}...`)
+                        })
+                    }
+                } else {
+                    console.log('⚠️ NYTimes API key not configured, skipping')
                 }
-            } else {
-                console.log('⚠️ NYTimes API key not configured, skipping')
+            } catch (error) {
+                console.error('❌ NYTimes API failed:', error)
             }
-        } catch (error) {
-            console.error('❌ NYTimes API failed:', error)
-        } console.log('🔄 Combined articles from all sources:', {
+        }
+
+        console.log('🔄 Combined articles from all sources:', {
             totalArticles: allArticles.length,
             sources: [...new Set(allArticles.map(a => a.source))].filter(Boolean)
         })

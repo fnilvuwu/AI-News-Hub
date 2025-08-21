@@ -19,7 +19,7 @@ interface UseNewsResult {
     loadMore: () => void
 }
 
-export function useNews(searchQuery: string = ''): UseNewsResult {
+export function useNews(searchQuery: string = '', sourceFilters: string[] = []): UseNewsResult {
     const [articles, setArticles] = useState<Article[]>([])
     const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
@@ -48,6 +48,9 @@ export function useNews(searchQuery: string = ''): UseNewsResult {
             const params = new URLSearchParams()
             if (searchQuery.trim()) {
                 params.append('search', searchQuery.trim())
+            }
+            if (sourceFilters.length > 0) {
+                params.append('sources', sourceFilters.join(','))
             }
 
             // Don't send limit - let API decide based on search vs browsing
@@ -127,9 +130,9 @@ export function useNews(searchQuery: string = ''): UseNewsResult {
     }
 
     useEffect(() => {
-        setCurrentPage(1) // Reset to page 1 when search changes
+        setCurrentPage(1) // Reset to page 1 when search or filters change
         fetchNews(1)
-    }, [searchQuery])
+    }, [searchQuery, sourceFilters]) // Watch both searchQuery and sourceFilters
 
     const goToPage = (page: number) => {
         if (page >= 1 && page <= totalPages && page !== currentPage) {

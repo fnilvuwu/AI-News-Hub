@@ -3,15 +3,17 @@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Footer } from "@/components/ui/footer"
 import { Header } from "@/components/ui/header"
 import { ImagePlaceholder } from "@/components/ui/image-placeholder"
 import { Input } from "@/components/ui/input"
 import { LoadMoreButton } from "@/components/ui/load-more-button"
 import { LoadingIndicator } from "@/components/ui/loading-indicator"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useNews } from "@/hooks/use-news"
-import { Newspaper, AlertCircle, Clock, ExternalLink, Eye, Search } from "lucide-react"
+import { AlertCircle, ChevronDown, Clock, ExternalLink, Eye, Filter, Newspaper, Search } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
@@ -22,8 +24,9 @@ export default function NewsPortal() {
   const [inputValue, setInputValue] = useState(initialSearch)
   const [isClearing, setIsClearing] = useState(false)
   const [sortBy, setSortBy] = useState<'date' | 'title' | 'views'>('date')
+  const [sourceFilters, setSourceFilters] = useState<string[]>(['newsapi', 'guardian', 'nytimes']) // All sources enabled by default
 
-  const { articles, loading, loadingMore, error, hasMore, refetch, loadMore } = useNews(searchQuery)
+  const { articles, loading, loadingMore, error, hasMore, refetch, loadMore } = useNews(searchQuery, sourceFilters)
 
   // Debounced search - wait 800ms after user stops typing
   useEffect(() => {
@@ -46,6 +49,7 @@ export default function NewsPortal() {
     setIsClearing(true)
     setSearchQuery("")
     setInputValue("")
+    setSourceFilters(['newsapi', 'guardian', 'nytimes']) // Reset to all sources enabled
     // Reset clearing state after search completes
     setTimeout(() => setIsClearing(false), 500)
   }
@@ -113,18 +117,19 @@ export default function NewsPortal() {
               <div className="text-center">
                 <Newspaper className="h-16 w-16 text-primary mx-auto mb-4" />
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-foreground mb-2 leading-tight">
-                  {searchQuery ? "Search Results" : "Latest AI News"}
+                  {searchQuery || sourceFilters.length < 3 ? "Filtered Results" : "Latest AI News"}
                 </h1>
-                {!searchQuery && (
+                {!searchQuery && sourceFilters.length === 3 && (
                   <p className="text-muted-foreground font-sans mt-3 text-lg">
                     Stay updated with the latest developments in artificial intelligence
                   </p>
                 )}
               </div>
 
-              {/* Search and Sort Controls - Full Width */}
-              <div className="flex flex-col sm:flex-row gap-3 w-full">
-                <div className="relative flex-1">
+              {/* Search, Filter, and Sort Controls - Single responsive row */}
+              <div className="flex flex-col xl:flex-row gap-4 w-full">
+                {/* Search Input */}
+                <div className="relative flex-1 min-w-0">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
                     type="text"
@@ -134,10 +139,86 @@ export default function NewsPortal() {
                     className="pl-10 bg-input border-border focus:ring-primary w-full"
                   />
                 </div>
-                <div className="flex items-center gap-2 sm:min-w-fit">
-                  <span className="text-sm text-muted-foreground font-sans whitespace-nowrap">Sort by:</span>
+
+                {/* Source Filters */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-shrink-0">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground font-sans whitespace-nowrap">Filter:</span>
+                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className="w-[200px] justify-between"
+                      >
+                        {sourceFilters.length === 3
+                          ? "All Sources"
+                          : sourceFilters.length === 0
+                            ? "No Sources"
+                            : `${sourceFilters.length} Selected`}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0">
+                      <div className="p-2 space-y-2">
+                        {[
+                          { id: 'newsapi', label: 'NewsAPI', description: 'General news sources' },
+                          { id: 'guardian', label: 'The Guardian', description: 'UK newspaper' },
+                          { id: 'nytimes', label: 'NY Times', description: 'US newspaper' }
+                        ].map((source) => (
+                          <div key={source.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={source.id}
+                              checked={sourceFilters.includes(source.id)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSourceFilters(prev => [...prev, source.id])
+                                } else {
+                                  setSourceFilters(prev => prev.filter(id => id !== source.id))
+                                }
+                              }}
+                            />
+                            <label
+                              htmlFor={source.id}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                              title={source.description}
+                            >
+                              {source.label}
+                            </label>
+                          </div>
+                        ))}
+                        <div className="border-t pt-2 mt-2">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 text-xs"
+                              onClick={() => setSourceFilters(['newsapi', 'guardian', 'nytimes'])}
+                            >
+                              All
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 text-xs"
+                              onClick={() => setSourceFilters([])}
+                            >
+                              None
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Sort Dropdown */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-sm text-muted-foreground font-sans whitespace-nowrap">Sort:</span>
                   <Select value={sortBy} onValueChange={(value: 'date' | 'title' | 'views') => setSortBy(value)}>
-                    <SelectTrigger className="w-full sm:w-[140px]">
+                    <SelectTrigger className="w-[120px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -150,11 +231,22 @@ export default function NewsPortal() {
               </div>
 
               {/* Search Results Info - Below search controls */}
-              {searchQuery && !loading && (
+              {(searchQuery || sourceFilters.length < 3) && !loading && (
                 <div className="flex items-center justify-between mt-4">
-                  <p className="text-muted-foreground font-sans">
-                    {sortedArticles.length} article{sortedArticles.length !== 1 ? "s" : ""} found for "{searchQuery}"
-                  </p>
+                  <div className="text-muted-foreground font-sans">
+                    <p>
+                      {sortedArticles.length} article{sortedArticles.length !== 1 ? "s" : ""} found
+                      {searchQuery && ` for "${searchQuery}"`}
+                      {sourceFilters.length < 3 && sourceFilters.length > 0 && (
+                        <span>
+                          {" "}from {sourceFilters.map(id => {
+                            const sourceNames = { newsapi: 'NewsAPI', guardian: 'The Guardian', nytimes: 'New York Times' }
+                            return sourceNames[id as keyof typeof sourceNames] || id
+                          }).join(', ')}
+                        </span>
+                      )}
+                    </p>
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"
@@ -162,7 +254,7 @@ export default function NewsPortal() {
                     disabled={isClearing}
                     className="font-sans"
                   >
-                    {isClearing ? "Clearing..." : "Clear Search"}
+                    {isClearing ? "Clearing..." : "Clear Filters"}
                   </Button>
                 </div>
               )}
@@ -177,7 +269,7 @@ export default function NewsPortal() {
             )}
 
             {/* Hero Article - First article in a large format */}
-            {!searchQuery && sortedArticles.length > 0 && (
+            {!searchQuery && sourceFilters.length === 3 && sortedArticles.length > 0 && (
               <div className="mb-8">
                 <Card className="overflow-hidden border-border bg-card hover:shadow-xl transition-all duration-300">
                   <div className="md:flex">
@@ -228,7 +320,7 @@ export default function NewsPortal() {
 
             {/* Articles Grid - Clean responsive layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(searchQuery ? sortedArticles : sortedArticles.slice(1)).map((article, index) => (
+              {((searchQuery || sourceFilters.length < 3) ? sortedArticles : sortedArticles.slice(1)).map((article, index) => (
                 <Card
                   key={article.id}
                   className="group hover:shadow-lg transition-all duration-200 border-border bg-card overflow-hidden"
@@ -298,24 +390,26 @@ export default function NewsPortal() {
         )}
 
         {/* No Results - Only show when not loading or when loading is complete */}
-        {!loading && sortedArticles.length === 0 && searchQuery && (
+        {!loading && sortedArticles.length === 0 && (searchQuery || sourceFilters.length < 3) && (
           <div className="flex flex-col items-center justify-center min-h-[50vh] w-full">
             <div className="text-center space-y-4">
-              <p className="text-muted-foreground font-sans text-lg">No AI articles found matching your search.</p>
+              <p className="text-muted-foreground font-sans text-lg">
+                No AI articles found matching your {searchQuery ? 'search' : 'filters'}.
+              </p>
               <Button
                 variant="outline"
                 onClick={handleClearSearch}
                 disabled={isClearing}
                 className="font-sans"
               >
-                {isClearing ? "Clearing..." : "Clear Search"}
+                {isClearing ? "Clearing..." : "Clear All Filters"}
               </Button>
             </div>
           </div>
         )}
 
         {/* No Articles State */}
-        {!loading && sortedArticles.length === 0 && !searchQuery && !error && (
+        {!loading && sortedArticles.length === 0 && !searchQuery && sourceFilters.length === 3 && !error && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] w-full">
             <div className="text-center space-y-4">
               <p className="text-muted-foreground font-sans text-lg">No AI news available at the moment.</p>
