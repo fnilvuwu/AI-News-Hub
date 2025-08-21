@@ -126,6 +126,8 @@ export default function AboutPage() {
                             <CardContent className="text-center">
                                 <div className="space-y-2">
                                     <Badge variant="secondary">NewsAPI</Badge>
+                                    <Badge variant="secondary">The Guardian API</Badge>
+                                    <Badge variant="secondary">The New York Times API</Badge>
                                     <Badge variant="secondary">REST APIs</Badge>
                                     <Badge variant="secondary">AI Content Filtering</Badge>
                                     <Badge variant="secondary">Real-time Updates</Badge>

@@ -8,7 +8,7 @@ import { Header } from "@/components/ui/header"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Building, Code, Github, Linkedin, Mail, MessageSquare, Send, User } from "lucide-react"
+import { Building, Code, Github, Globe, Linkedin, Mail, MessageSquare, Send, User } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
@@ -23,9 +23,40 @@ export default function ContactPage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        // Note: In a real application, you would implement form submission here
-        // For this demo, we'll just show an alert
-        alert('Thank you for your message! This is a demo form - in a real application, this would be sent to the developer.')
+
+        // Construct email parameters
+        const emailTo = 'mamatmks45@gmail.com'
+        const emailSubject = encodeURIComponent(formData.subject || 'Contact from AI News Hub')
+        const emailBody = encodeURIComponent(
+            `Name: ${formData.name}\n` +
+            `Email: ${formData.email}\n\n` +
+            `Message:\n${formData.message}`
+        )
+
+        // Create mailto link
+        const mailtoLink = `mailto:${emailTo}?subject=${emailSubject}&body=${emailBody}`
+
+        // Try to open default mail client
+        try {
+            window.location.href = mailtoLink
+        } catch (error) {
+            // Fallback: show instructions to user
+            alert(
+                'Please send your message to: mamatmks45@gmail.com\n\n' +
+                `Subject: ${formData.subject}\n\n` +
+                `Name: ${formData.name}\n` +
+                `Email: ${formData.email}\n\n` +
+                `Message: ${formData.message}`
+            )
+        }
+
+        // Reset form after submission
+        setFormData({
+            name: '',
+            email: '',
+            subject: '',
+            message: ''
+        })
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -119,10 +150,6 @@ export default function ContactPage() {
                                     <Send className="h-4 w-4 mr-2" />
                                     Send Message
                                 </Button>
-
-                                <p className="text-sm text-muted-foreground text-center">
-                                    Note: This is a demo form. In a real application, messages would be sent to the developer.
-                                </p>
                             </form>
                         </CardContent>
                     </Card>
@@ -187,29 +214,55 @@ export default function ContactPage() {
                                     </p>
 
                                     <div className="grid grid-cols-1 gap-3">
-                                        <div className="flex items-center space-x-3 p-3 rounded-lg border border-border">
-                                            <Github className="h-5 w-5 text-muted-foreground" />
-                                            <div>
-                                                <p className="font-medium">GitHub</p>
-                                                <p className="text-sm text-muted-foreground">github.com/fnilvuwu</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center space-x-3 p-3 rounded-lg border border-border">
-                                            <Linkedin className="h-5 w-5 text-muted-foreground" />
-                                            <div>
-                                                <p className="font-medium">LinkedIn</p>
-                                                <p className="text-sm text-muted-foreground">linkedin.com/in/fnilvuwu</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center space-x-3 p-3 rounded-lg border border-border">
+                                        <Link
+                                            href="mailto:mamatmks45@gmail.com"
+                                            className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors"
+                                        >
                                             <Mail className="h-5 w-5 text-muted-foreground" />
                                             <div>
                                                 <p className="font-medium">Email</p>
                                                 <p className="text-sm text-muted-foreground">mamatmks45@gmail.com</p>
                                             </div>
-                                        </div>
+                                        </Link>
+                                        
+                                        <Link
+                                            href="https://github.com/fnilvuwu"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors"
+                                        >
+                                            <Github className="h-5 w-5 text-muted-foreground" />
+                                            <div>
+                                                <p className="font-medium">GitHub</p>
+                                                <p className="text-sm text-muted-foreground">github.com/fnilvuwu</p>
+                                            </div>
+                                        </Link>
+
+                                        <Link
+                                            href="https://linkedin.com/in/fnilvuwu"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors"
+                                        >
+                                            <Linkedin className="h-5 w-5 text-muted-foreground" />
+                                            <div>
+                                                <p className="font-medium">LinkedIn</p>
+                                                <p className="text-sm text-muted-foreground">linkedin.com/in/fnilvuwu</p>
+                                            </div>
+                                        </Link>
+
+                                        <Link
+                                            href="https://fnilvuwu.vercel.app"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors"
+                                        >
+                                            <Globe className="h-5 w-5 text-muted-foreground" />
+                                            <div>
+                                                <p className="font-medium">Portfolio</p>
+                                                <p className="text-sm text-muted-foreground">fnilvuwu.vercel.app</p>
+                                            </div>
+                                        </Link>
                                     </div>
                                 </div>
                             </CardContent>
