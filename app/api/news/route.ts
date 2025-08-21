@@ -200,8 +200,20 @@ export async function GET(request: NextRequest) {
             })
         }
 
-        // Calculate pagination offset - 18 articles per page for all cases
-        const offset = (page - 1) * 18
+        // Calculate pagination offset - account for first page having 19 articles
+        let offset: number
+        if (search && search.trim()) {
+            // Search results: always 18 articles per page
+            offset = (page - 1) * 18
+        } else {
+            // Regular browsing: first page has 19, subsequent pages have 18
+            if (page === 1) {
+                offset = 0
+            } else {
+                // For page 2+: skip first 19 articles, then 18 articles per additional page
+                offset = 19 + ((page - 2) * 18)
+            }
+        }
 
         console.log('📄 Pagination calculation:', {
             page,
@@ -209,7 +221,8 @@ export async function GET(request: NextRequest) {
             offset,
             totalAvailable: allArticles.length,
             requestedEnd: offset + limit,
-            willGetArticles: Math.min(limit, Math.max(0, allArticles.length - offset))
+            willGetArticles: Math.min(limit, Math.max(0, allArticles.length - offset)),
+            isSearch: !!(search && search.trim())
         })
 
         const totalResults = allArticles.length

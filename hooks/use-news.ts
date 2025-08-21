@@ -82,13 +82,24 @@ export function useNews(searchQuery: string = '', sourceFilters: string[] = []):
             }
 
             if (append) {
-                // Append new articles to existing ones
+                // Append new articles to existing ones, but filter out duplicates
                 console.log('➕ Appending articles:', {
                     existingCount: articles.length,
                     newCount: data.articles.length,
                     totalAfterAppend: articles.length + data.articles.length
                 })
-                setArticles(prevArticles => [...prevArticles, ...data.articles])
+
+                // Create a set of existing article IDs to check for duplicates
+                const existingIds = new Set(articles.map(article => article.id))
+                const newUniqueArticles = data.articles.filter(article => !existingIds.has(article.id))
+
+                console.log('🔍 Duplicate filtering:', {
+                    newArticlesReceived: data.articles.length,
+                    uniqueNewArticles: newUniqueArticles.length,
+                    duplicatesFiltered: data.articles.length - newUniqueArticles.length
+                })
+
+                setArticles(prevArticles => [...prevArticles, ...newUniqueArticles])
             } else {
                 // Replace articles (initial load or page navigation)
                 console.log('🔄 Replacing articles:', {
@@ -130,9 +141,15 @@ export function useNews(searchQuery: string = '', sourceFilters: string[] = []):
     }
 
     useEffect(() => {
+        console.log('🔄 useEffect triggered - resetting to page 1:', {
+            searchQuery: searchQuery.trim(),
+            sourceFilters,
+            timestamp: new Date().toISOString()
+        })
         setCurrentPage(1) // Reset to page 1 when search or filters change
+        setArticles([]) // Clear existing articles to prevent showing old data
         fetchNews(1)
-    }, [searchQuery, sourceFilters]) // Watch both searchQuery and sourceFilters
+    }, [searchQuery, sourceFilters.join(',')]) // Use join to properly detect filter changes
 
     const goToPage = (page: number) => {
         if (page >= 1 && page <= totalPages && page !== currentPage) {
