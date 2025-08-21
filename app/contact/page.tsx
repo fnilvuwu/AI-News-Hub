@@ -205,14 +205,10 @@ export default function ContactPage() {
                         {/* Social Links */}
                         <Card className="border-border bg-card">
                             <CardHeader>
-                                <CardTitle>Connect on Social</CardTitle>
+                                <CardTitle>Connect on Social Media</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    <p className="text-muted-foreground text-sm">
-                                        While this is a demo project, here's where you might typically find developer social links:
-                                    </p>
-
                                     <div className="grid grid-cols-1 gap-3">
                                         <Link
                                             href="mailto:mamatmks45@gmail.com"

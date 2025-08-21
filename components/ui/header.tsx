@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { Menu, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -29,40 +30,45 @@ export function Header() {
                         <h1 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold text-primary">AI News Hub</h1>
                     </Link>
 
-                    {/* Desktop Navigation */}
-                    <nav className="hidden md:flex items-center space-x-6">
-                        <Link
-                            href="/"
-                            className={`hover:text-primary transition-colors font-sans ${pathname === "/" ? "text-foreground" : "text-muted-foreground"
-                                }`}
-                        >
-                            Home
-                        </Link>
-                        <Link
-                            href="/about"
-                            className={`hover:text-primary transition-colors font-sans ${pathname === "/about" ? "text-foreground" : "text-muted-foreground"
-                                }`}
-                        >
-                            About
-                        </Link>
-                        <Link
-                            href="/contact"
-                            className={`hover:text-primary transition-colors font-sans ${pathname === "/contact" ? "text-foreground" : "text-muted-foreground"
-                                }`}
-                        >
-                            Contact
-                        </Link>
-                    </nav>
+                    {/* Desktop Navigation and Theme Toggle */}
+                    <div className="hidden md:flex items-center space-x-6">
+                        <nav className="flex items-center space-x-6">
+                            <Link
+                                href="/"
+                                className={`hover:text-primary transition-colors font-sans ${pathname === "/" ? "text-foreground" : "text-muted-foreground"
+                                    }`}
+                            >
+                                Home
+                            </Link>
+                            <Link
+                                href="/about"
+                                className={`hover:text-primary transition-colors font-sans ${pathname === "/about" ? "text-foreground" : "text-muted-foreground"
+                                    }`}
+                            >
+                                About
+                            </Link>
+                            <Link
+                                href="/contact"
+                                className={`hover:text-primary transition-colors font-sans ${pathname === "/contact" ? "text-foreground" : "text-muted-foreground"
+                                    }`}
+                            >
+                                Contact
+                            </Link>
+                        </nav>
+                        <ThemeToggle />
+                    </div>
 
-                    {/* Mobile Menu Button */}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="md:hidden"
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    >
-                        {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                    </Button>
+                    {/* Mobile Menu Button and Theme Toggle */}
+                    <div className="md:hidden flex items-center space-x-2">
+                        <ThemeToggle />
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        >
+                            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Mobile Navigation Menu */}

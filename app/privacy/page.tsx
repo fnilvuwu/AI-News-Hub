@@ -88,7 +88,7 @@ export default function PrivacyPolicyPage() {
                                 <p className="text-muted-foreground leading-relaxed">
                                     This Privacy Policy describes how AI News Hub ("we," "our," or "us") collects, uses,
                                     and protects your information when you use our website. This project was created by
-                                    <span className="font-semibold text-foreground"> fnilvuwu</span> as a technical demonstration for a Web Developer Internship position at
+                                    <span className="font-semibold text-foreground"> Rahmatullah R (fnilvuwu)</span> as a technical demonstration for a Web Developer Internship position at
                                     <span className="font-semibold text-primary"> Digital Hero</span>.
                                 </p>
                                 <p className="text-muted-foreground leading-relaxed">
@@ -340,7 +340,7 @@ export default function PrivacyPolicyPage() {
                                         <div className="flex items-center">
                                             <User className="h-5 w-5 text-primary mr-3" />
                                             <span className="font-semibold text-foreground">Developer:</span>
-                                            <span className="text-muted-foreground ml-2">fnilvuwu</span>
+                                            <span className="text-muted-foreground ml-2">Rahmatullah R (fnilvuwu)</span>
                                         </div>
                                         <div className="flex items-center">
                                             <Building className="h-5 w-5 text-primary mr-3" />
