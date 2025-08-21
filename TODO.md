@@ -6,21 +6,21 @@
 **Priority: High** | **Estimated Time: 4-5 days**
 
 #### Sub-tasks:
-- [ ] **4.1** Research and select APIs
-  - [ ] Identify 2 additional news API sources (e.g., Guardian API, Reddit API, Google News API)
-  - [ ] Check rate limits, pricing, and terms of service
-  - [ ] Obtain API keys
-- [ ] **4.2** Create API integration modules
-  - [ ] Create `lib/guardianapi.ts` (or chosen API)
-  - [ ] Create `lib/secondapi.ts` (or chosen API)
-  - [ ] Implement data transformation functions
+- [x] **4.1** Research and select APIs
+  - [x] Identify 2 additional news API sources (e.g., Guardian API, Reddit API, Google News API)
+  - [x] Check rate limits, pricing, and terms of service
+  - [x] Obtain API keys
+- [x] **4.2** Create API integration modules
+  - [x] Create `lib/guardianapi.ts` (or chosen API)
+  - [x] Create `lib/nytimesapi.ts` (or chosen API)
+  - [x] Implement data transformation functions
 - [ ] **4.3** Update type definitions
   - [ ] Extend `lib/types.ts` for new API response formats
   - [ ] Create union types for multiple sources
-- [ ] **4.4** Modify news aggregation logic
-  - [ ] Update `/api/news/route.ts` to fetch from multiple sources
-  - [ ] Implement data merging and deduplication
-  - [ ] Add source attribution to articles
+- [x] **4.4** Modify news aggregation logic
+  - [x] Update `/api/news/route.ts` to fetch from multiple sources
+  - [x] Implement data merging and deduplication
+  - [x] Add source attribution to articles
 - [ ] **4.5** Update UI to show article sources
   - [ ] Add source badges to article cards
   - [ ] Update article metadata display

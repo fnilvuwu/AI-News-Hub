@@ -1,5 +1,6 @@
 import { GuardianAPI } from '@/lib/guardianapi'
 import { fetchAINews, transformNewsAPIArticle } from '@/lib/newsapi'
+import { NYTimesAPI } from '@/lib/nytimesapi'
 import { Article, NewsResponse } from '@/lib/types'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -103,6 +104,44 @@ export async function GET(request: NextRequest) {
             }
         } catch (error) {
             console.error('❌ Guardian API failed:', error)
+        }
+
+        // Fetch from NYTimes API - use single request to avoid rate limits
+        try {
+            const nytimesApiKey = process.env.NYTIMES_API_KEY
+            if (nytimesApiKey) {
+                const nytimesAPI = new NYTimesAPI(nytimesApiKey)
+
+                // Fetch only one page from NYTimes to respect rate limits
+                console.log(`🔍 Fetching from NYTimes API for page ${page}`)
+
+                const nytimesData = await nytimesAPI.searchArticles({
+                    q: search || undefined,
+                    page: Math.min(page - 1, 0), // NYTimes uses 0-based page numbering, but don't go beyond page 0 for rate limiting
+                    sort: 'newest'
+                })
+
+                // Handle case where docs might be null or empty
+                const docs = nytimesData.response.docs || []
+                const nytimesArticles = docs
+                    .map((article, index) => nytimesAPI.transformArticle(article, allArticles.length + index))
+
+                allArticles.push(...nytimesArticles)
+                console.log(`✅ NYTimes articles:`, nytimesArticles.length)
+
+                // Log first few NYTimes articles to check dates
+                const allNYTimesArticles = allArticles.filter(a => a.source === 'The New York Times')
+                if (allNYTimesArticles.length > 0) {
+                    console.log('🗞️ First 3 NYTimes articles:')
+                    allNYTimesArticles.slice(0, 3).forEach((article, i) => {
+                        console.log(`${i + 1}. [${article.source}] ${article.publishedAt} - ${article.headline.substring(0, 50)}...`)
+                    })
+                }
+            } else {
+                console.log('⚠️ NYTimes API key not configured, skipping')
+            }
+        } catch (error) {
+            console.error('❌ NYTimes API failed:', error)
         } console.log('🔄 Combined articles from all sources:', {
             totalArticles: allArticles.length,
             sources: [...new Set(allArticles.map(a => a.source))].filter(Boolean)
